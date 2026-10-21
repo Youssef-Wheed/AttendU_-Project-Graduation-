@@ -104,9 +104,9 @@ async def stop_attendance_session(
             status_code=status.HTTP_404_NOT_FOUND, detail="session not found"
         )
     if not session.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="session is already stopped"
-        )
+        # Idempotent stop: the session may already have been auto-closed
+        # because its window elapsed. Return the closed session as-is.
+        return session
     return await attendance_session_controller.stop_session(db, session)
 
 
