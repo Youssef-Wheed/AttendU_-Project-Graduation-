@@ -32,18 +32,18 @@
   border-radius: var(--radius-lg);
   padding: 0 1.375rem;
   cursor: pointer;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-on-primary);
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
   font: inherit;
   font-weight: 700;
-  box-shadow: 0 8px 20px rgba(77, 156, 255, 0.25);
+  box-shadow: 0 8px 20px rgba(124, 143, 255, 0.25);
   transition: transform 0.16s ease, box-shadow 0.16s ease;
   touch-action: manipulation;
 }
 
 .admin-empty-state button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(77, 156, 255, 0.35);
+  box-shadow: 0 12px 28px rgba(124, 143, 255, 0.35);
 }
 
 .admin-empty-state button:active {

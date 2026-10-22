@@ -36,7 +36,7 @@
 .asp__search:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(77, 156, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 143, 255, 0.15);
 }
 
 .asp__search::placeholder {
@@ -73,10 +73,10 @@
 .asp__error {
   padding: var(--space-4);
   border-radius: var(--radius-lg);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(225, 29, 72, 0.1);
   color: #f87171;
   font-size: 0.875rem;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(225, 29, 72, 0.2);
 }
 
 /* ── Table shell ─────────────────────────────── */
@@ -151,8 +151,8 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
+  color: var(--color-on-primary);
   font-size: 0.75rem;
   font-weight: 700;
   display: flex;
@@ -169,7 +169,7 @@
 
 /* ── RFID tag ────────────────────────────────── */
 .asp__rfid {
-  font-family: 'Space Grotesk', monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);

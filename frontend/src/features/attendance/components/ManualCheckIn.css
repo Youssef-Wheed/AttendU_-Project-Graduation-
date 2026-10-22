@@ -47,7 +47,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-on-soft-primary);
 }
 
 .manual-checkin-field {
@@ -70,7 +70,7 @@
 .manual-checkin-input-wrap input {
   width: 100%;
   padding: 0.85rem 1.25rem;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border-glass);
   border-radius: var(--radius-xl);
   font-size: 1rem;
@@ -81,7 +81,7 @@
 
 .manual-checkin-input-wrap input:focus {
   outline: none;
-  background: #ffffff;
+  background: var(--color-surface);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px var(--color-primary-soft);
 }
@@ -115,7 +115,7 @@
   gap: var(--space-2);
   padding: var(--space-3);
   border-radius: var(--radius-xl);
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border-glass);
   max-height: 250px;
   overflow: auto;
@@ -129,7 +129,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   border: 1px solid transparent;
-  background: #ffffff;
+  background: var(--color-surface);
   cursor: pointer;
   transition: all 0.2s var(--ease-out-quad);
 }
@@ -174,19 +174,19 @@
   border-radius: var(--radius-lg);
   font-size: 0.85rem;
   font-weight: 700;
-  box-shadow: var(--elevation-4);
+  box-shadow: var(--shadow-3);
   z-index: 10;
-  animation: manual-toast-in 0.3s var(--ease-out-back);
+  animation: manual-toast-in 0.3s var(--ease-spring);
 }
 
 .manual-checkin-toast.success {
-  background: #10b981;
-  color: #ffffff;
+  background: var(--color-success-strong);
+  color: var(--color-on-primary);
 }
 
 .manual-checkin-toast.error {
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--color-danger-strong);
+  color: var(--color-on-primary);
 }
 
 @keyframes manual-spin {

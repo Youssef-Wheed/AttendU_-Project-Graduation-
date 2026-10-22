@@ -57,7 +57,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--color-success-soft);
-  color: var(--color-success);
+  color: var(--color-on-soft-success);
 }
 
 .attendance-list-pill.is-offline {
@@ -83,7 +83,7 @@
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border-glass);
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-surface-soft);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-text-muted);
@@ -101,8 +101,8 @@
 .attendance-list-export {
   padding: 0.5rem 1rem;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: #ffffff;
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary);
   border: none;
   font-size: 0.8rem;
   font-weight: 800;
@@ -144,12 +144,12 @@
 }
 
 .attendance-list-table tbody tr {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-surface-subtle);
   transition: all 0.2s var(--ease-out-quad);
 }
 
 .attendance-list-table tbody tr:hover {
-  background: #ffffff;
+  background: var(--color-surface);
   transform: scale(1.005);
   box-shadow: var(--elevation-1);
 }
@@ -181,8 +181,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--gradient-aurora);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
+  color: var(--color-on-primary);
   font-size: 0.8rem;
   font-weight: 800;
   box-shadow: var(--elevation-1);
@@ -209,12 +209,12 @@
   letter-spacing: 0.05em;
 }
 
-.method-rfid { background: #e0f2fe; color: #0369a1; }
-.method-face { background: #f0f9ff; color: #0284c7; }
-.method-manual { background: #fef3c7; color: #b45309; }
-.status-present { background: #dcfce7; color: #15803d; }
-.status-late { background: #ffedd5; color: #c2410c; }
-.status-absent { background: #fee2e2; color: #b91c1c; }
+.method-rfid { background: var(--color-primary-soft); color: var(--color-on-soft-primary); }
+.method-face { background: var(--color-secondary-soft); color: var(--color-on-soft-secondary); }
+.method-manual { background: var(--color-surface-soft); color: var(--color-text-secondary); }
+.status-present { background: var(--color-success-soft); color: var(--color-on-soft-success); }
+.status-late { background: var(--color-warning-soft); color: var(--color-on-soft-warning); }
+.status-absent { background: var(--color-danger-soft); color: var(--color-on-soft-danger); }
 
 .attendance-list-empty {
   text-align: center;

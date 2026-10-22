@@ -1,28 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-
 :root {
-  --color-bg: #080c14;
-  --color-surface: #0e1524;
-  --color-surface-subtle: #0a1020;
-  --color-surface-soft: #111827;
-  --color-border: rgba(99, 140, 210, 0.13);
-  --color-border-strong: rgba(99, 140, 210, 0.24);
-  --color-border-glass: rgba(99, 140, 210, 0.10);
-  --color-text: #dde5f4;
-  --color-text-muted: #5e7299;
-  --color-primary: #4d9cff;
-  --color-primary-strong: #2b7fe0;
-  --color-primary-soft: rgba(77, 156, 255, 0.12);
-  --color-secondary: #22d5eb;
-  --color-secondary-soft: rgba(34, 213, 235, 0.10);
-  --color-focus: #4d9cff;
-  --color-danger: #f05252;
-  --color-danger-soft: rgba(240, 82, 82, 0.12);
-  --color-success: #22c55e;
-  --color-success-soft: rgba(34, 197, 94, 0.12);
-  --color-warning: #f59e0b;
-  --color-warning-soft: rgba(245, 158, 11, 0.12);
-  --color-surface-glass: rgba(14, 21, 36, 0.85);
+  --font-body: 'Inter Variable', 'Inter', 'Cairo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', 'Inter Variable', 'Cairo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace;
+
+  --color-bg: #0b1020;
+  --color-surface: #131b2e;
+  --color-surface-subtle: #0f1626;
+  --color-surface-soft: #1b2540;
+  --color-border: rgba(148, 163, 184, 0.16);
+  --color-border-strong: rgba(148, 163, 184, 0.32);
+  --color-border-glass: rgba(148, 163, 184, 0.12);
+  --color-text: #e7ecf7;
+  --color-text-muted: #98a6c4;
+  --color-primary: #7c8fff;
+  --color-primary-strong: #4c63d2;
+  --color-primary-soft: rgba(124, 143, 255, 0.14);
+  --color-secondary: #2dd4bf;
+  --color-secondary-strong: #0f766e;
+  --color-secondary-soft: rgba(45, 212, 191, 0.12);
+  --color-on-primary: #ffffff;
+  --color-focus: #7c8fff;
+  --color-danger: #fb7185;
+  --color-danger-soft: rgba(251, 113, 133, 0.14);
+  --color-danger-strong: #e11d48;
+  --color-success: #34d399;
+  --color-success-soft: rgba(52, 211, 153, 0.14);
+  --color-success-strong: #15803d;
+  --color-warning: #fbbf24;
+  --color-warning-soft: rgba(251, 191, 36, 0.14);
+  --color-warning-strong: #b45309;
+  --color-error: var(--color-danger);
+  --color-error-soft: var(--color-danger-soft);
+  --color-on-soft-primary: #7c8fff;
+  --color-on-soft-secondary: #2dd4bf;
+  --color-on-soft-success: #34d399;
+  --color-on-soft-warning: #fbbf24;
+  --color-on-soft-danger: #fb7185;
+  --color-surface-glass: rgba(19, 27, 46, 0.85);
 
   --ink: var(--color-text);
   --muted: var(--color-text-muted);
@@ -36,8 +50,9 @@
   --danger-soft: var(--color-danger-soft);
   --success: var(--color-success);
   --success-soft: var(--color-success-soft);
-  --glass-bg: rgba(14, 21, 36, 0.88);
-  --glass-border: rgba(99, 140, 210, 0.12);
+  --on-primary: var(--color-on-primary);
+  --glass-bg: rgba(19, 27, 46, 0.88);
+  --glass-border: rgba(148, 163, 184, 0.14);
   --glass-blur: blur(14px);
 
   --space-1: 0.25rem;
@@ -87,44 +102,54 @@
   --touch-min: 2.75rem;
 
   /* Hover surface tokens */
-  --color-surface-hover: rgba(77, 156, 255, 0.07);
+  --color-surface-hover: rgba(124, 143, 255, 0.08);
   --color-surface-raised: rgba(255, 255, 255, 0.05);
   --color-text-primary: var(--color-text);
-  --color-text-secondary: rgba(221, 229, 244, 0.7);
+  --color-text-secondary: rgba(231, 236, 247, 0.72);
 }
 
 html[data-theme="light"] {
-  --color-bg: #f0f4fb;
+  --color-bg: #f4f6fc;
   --color-surface: #ffffff;
-  --color-surface-subtle: #f5f8fe;
-  --color-surface-soft: #eef2f9;
-  --color-border: rgba(99, 140, 210, 0.2);
-  --color-border-strong: rgba(99, 140, 210, 0.38);
-  --color-border-glass: rgba(99, 140, 210, 0.14);
-  --color-text: #0f1a2e;
-  --color-text-muted: #4e6285;
-  --color-primary: #2b7fe0;
-  --color-primary-strong: #1a67c5;
-  --color-primary-soft: rgba(43, 127, 224, 0.1);
-  --color-secondary: #0fbfd6;
-  --color-secondary-soft: rgba(15, 191, 214, 0.1);
-  --color-focus: #2b7fe0;
+  --color-surface-subtle: #f8faff;
+  --color-surface-soft: #edf1fa;
+  --color-border: rgba(71, 85, 105, 0.18);
+  --color-border-strong: rgba(71, 85, 105, 0.34);
+  --color-border-glass: rgba(71, 85, 105, 0.12);
+  --color-text: #0f172a;
+  --color-text-muted: #51607a;
+  --color-primary: #3b5bdb;
+  --color-primary-strong: #2f49b2;
+  --color-primary-soft: rgba(59, 91, 219, 0.1);
+  --color-secondary: #0f766e;
+  --color-secondary-strong: #115e59;
+  --color-secondary-soft: rgba(15, 118, 110, 0.1);
+  --color-on-primary: #ffffff;
+  --color-focus: #3b5bdb;
   --color-danger: #dc2626;
   --color-danger-soft: rgba(220, 38, 38, 0.1);
-  --color-success: #16a34a;
-  --color-success-soft: rgba(22, 163, 74, 0.1);
-  --color-warning: #d97706;
-  --color-warning-soft: rgba(217, 119, 6, 0.1);
+  --color-danger-strong: #b91c1c;
+  --color-success: #15803d;
+  --color-success-soft: rgba(21, 128, 61, 0.1);
+  --color-success-strong: #166534;
+  --color-warning: #b45309;
+  --color-warning-soft: rgba(180, 83, 9, 0.1);
+  --color-warning-strong: #92400e;
+  --color-on-soft-primary: #2f49b2;
+  --color-on-soft-secondary: #115e59;
+  --color-on-soft-success: #166534;
+  --color-on-soft-warning: #92400e;
+  --color-on-soft-danger: #991b1b;
   --color-surface-glass: rgba(255, 255, 255, 0.9);
 
   --glass-bg: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(99, 140, 210, 0.15);
+  --glass-border: rgba(71, 85, 105, 0.15);
 
   /* Hover surface tokens (light) */
-  --color-surface-hover: rgba(43, 127, 224, 0.07);
-  --color-surface-raised: rgba(0, 0, 0, 0.03);
-  --color-text-primary: #0f1a2e;
-  --color-text-secondary: #4e6285;
+  --color-surface-hover: rgba(59, 91, 219, 0.07);
+  --color-surface-raised: rgba(15, 23, 42, 0.03);
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #51607a;
 
   --shadow-1: 0 4px 16px rgba(15, 26, 46, 0.07);
   --shadow-2: 0 8px 32px rgba(15, 26, 46, 0.1);
@@ -148,13 +173,13 @@ body,
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-body);
   color: var(--color-text);
   background:
-    radial-gradient(ellipse at 10% 0%, rgba(77, 156, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 5%, rgba(34, 213, 235, 0.06) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 100%, rgba(77, 156, 255, 0.04) 0%, transparent 60%),
-    linear-gradient(180deg, #080c14 0%, #060910 100%);
+    radial-gradient(ellipse at 10% 0%, rgba(124, 143, 255, 0.09) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 5%, rgba(45, 212, 191, 0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(124, 143, 255, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #0b1020 0%, #070b16 100%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -165,10 +190,10 @@ body {
 
 html[data-theme="light"] body {
   background:
-    radial-gradient(ellipse at 10% 0%, rgba(43, 127, 224, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 5%, rgba(15, 191, 214, 0.04) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 100%, rgba(43, 127, 224, 0.03) 0%, transparent 60%),
-    linear-gradient(180deg, #f0f4fb 0%, #e8eef7 100%);
+    radial-gradient(ellipse at 10% 0%, rgba(59, 91, 219, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 5%, rgba(15, 118, 110, 0.04) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 100%, rgba(59, 91, 219, 0.03) 0%, transparent 60%),
+    linear-gradient(180deg, #f4f6fc 0%, #e9eefa 100%);
 }
 
 body,
@@ -176,7 +201,7 @@ button,
 input,
 select,
 textarea {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-body);
 }
 
 h1,
@@ -187,7 +212,7 @@ h5,
 h6,
 .font-heading {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   letter-spacing: 0;
 }
 
@@ -214,13 +239,13 @@ img {
 }
 
 :focus-visible {
-  outline: 2px solid rgba(77, 156, 255, 0.5);
+  outline: 2px solid rgba(124, 143, 255, 0.6);
   outline-offset: 2px;
 }
 
 ::selection {
-  color: #ffffff;
-  background: var(--color-primary);
+  color: var(--color-on-primary);
+  background: var(--color-primary-strong);
 }
 
 .app-root {

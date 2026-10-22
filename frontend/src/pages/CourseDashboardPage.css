@@ -19,6 +19,16 @@
   margin-top: var(--space-5);
 }
 
+/* Recharts renders legend/axis labels as SVG <Text> — style them with tokens */
+.course-dashboard-chart-frame .recharts-legend-item-text {
+  fill: var(--color-text-muted);
+  color: var(--color-text-muted);
+}
+
+.course-dashboard-chart-frame .recharts-tooltip-wrapper {
+  outline: none;
+}
+
 /* ─── Responsive ──────────────────────────────────────────── */
 
 @media (max-width: 1024px) {

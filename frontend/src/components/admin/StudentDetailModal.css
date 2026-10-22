@@ -54,16 +54,16 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: #ffffff;
-  font-family: 'Space Grotesk', sans-serif;
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
+  color: var(--color-on-primary);
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(77, 156, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(124, 143, 255, 0.3);
   letter-spacing: -0.03em;
 }
 
@@ -74,7 +74,7 @@
 
 .sdm-name {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-text);
@@ -155,7 +155,7 @@
 }
 
 .sdm-mono {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   color: var(--color-primary);
@@ -177,7 +177,7 @@
 
 .sdm-section-title {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -197,8 +197,8 @@
   padding: 0.35rem 0.85rem;
   border-radius: var(--radius-pill);
   background: var(--color-primary-soft);
-  border: 1px solid rgba(77, 156, 255, 0.2);
-  color: var(--color-primary);
+  border: 1px solid rgba(124, 143, 255, 0.2);
+  color: var(--color-on-soft-primary);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -248,10 +248,10 @@
 }
 
 .sdm-face-action {
-  border: 1px solid rgba(77, 156, 255, 0.2);
+  border: 1px solid rgba(124, 143, 255, 0.2);
   border-radius: var(--radius-pill);
   background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-on-soft-primary);
   font-size: 0.78rem;
   font-weight: 700;
   padding: 0.45rem 0.8rem;
@@ -260,7 +260,7 @@
 }
 
 .sdm-face-action:hover {
-  background: rgba(77, 156, 255, 0.12);
+  background: rgba(124, 143, 255, 0.12);
 }
 
 /* ─── Footer ───────────────────────────────────────── */

@@ -46,7 +46,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 100% 0%, rgba(77, 156, 255, 0.06) 0%, transparent 60%);
+  background: radial-gradient(circle at 100% 0%, rgba(124, 143, 255, 0.06) 0%, transparent 60%);
   pointer-events: none;
   transition: opacity 200ms ease;
 }
@@ -55,7 +55,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 100% 0%, rgba(77, 156, 255, 0.1) 0%, transparent 55%);
+  background: radial-gradient(circle at 100% 0%, rgba(124, 143, 255, 0.1) 0%, transparent 55%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 200ms ease;
@@ -63,8 +63,8 @@
 
 .dashboard-course-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(77, 156, 255, 0.28);
-  box-shadow: var(--shadow-2), 0 0 0 1px rgba(77, 156, 255, 0.08);
+  border-color: rgba(124, 143, 255, 0.28);
+  box-shadow: var(--shadow-2), 0 0 0 1px rgba(124, 143, 255, 0.08);
   background: rgba(14, 21, 36, 0.95);
 }
 
@@ -94,8 +94,8 @@
   justify-content: center;
   border-radius: var(--radius-xl);
   background: var(--color-primary-soft);
-  color: var(--color-primary);
-  border: 1px solid rgba(77, 156, 255, 0.15);
+  color: var(--color-on-soft-primary);
+  border: 1px solid rgba(124, 143, 255, 0.15);
   flex-shrink: 0;
   transition: transform 200ms var(--ease-spring);
 }
@@ -113,7 +113,7 @@
   font-size: 1.15rem;
   line-height: 1.25;
   color: var(--color-text);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
 }
 
 .dashboard-course-card__body p {

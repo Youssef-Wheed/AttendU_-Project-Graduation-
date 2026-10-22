@@ -23,7 +23,7 @@
   opacity: 0;
   transform-origin: left center;
   transition: none;
-  box-shadow: 0 0 10px rgba(77, 156, 255, 0.7), 0 0 4px rgba(34, 213, 235, 0.5);
+  box-shadow: 0 0 10px rgba(124, 143, 255, 0.7), 0 0 4px rgba(45, 212, 191, 0.5);
 }
 
 /* Phase 1: expand to 85%, become visible */
@@ -52,5 +52,5 @@
 
 /* Light mode: slightly softer glow */
 html[data-theme="light"] .tpb__fill {
-  box-shadow: 0 0 8px rgba(43, 127, 224, 0.5), 0 0 3px rgba(15, 191, 214, 0.4);
+  box-shadow: 0 0 8px rgba(59, 91, 219, 0.5), 0 0 3px rgba(15, 118, 110, 0.4);
 }

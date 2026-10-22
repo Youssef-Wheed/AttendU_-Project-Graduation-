@@ -23,7 +23,7 @@
 
 .session-stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--elevation-3);
+  box-shadow: var(--shadow-3);
   border-color: var(--color-primary-soft);
 }
 
@@ -35,7 +35,7 @@
   justify-content: center;
   border-radius: var(--radius-xl);
   background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-on-soft-primary);
   flex-shrink: 0;
 }
 
@@ -68,21 +68,21 @@
 }
 
 .session-stat-card--success {
-  border-color: rgba(16, 185, 129, 0.2);
+  border-color: rgba(21, 128, 61, 0.2);
 }
 
 .session-stat-card--success .session-stat-card__icon {
   background: var(--color-success-soft);
-  color: var(--color-success);
+  color: var(--color-on-soft-success);
 }
 
 .session-stat-card--danger {
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(225, 29, 72, 0.2);
 }
 
 .session-stat-card--danger .session-stat-card__icon {
   background: var(--color-error-soft);
-  color: var(--color-error);
+  color: var(--color-on-soft-danger);
 }
 
 @media (max-width: 600px) {

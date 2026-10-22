@@ -50,10 +50,10 @@
 }
 
 .students-page__filter-tab--active {
-  color: #ffffff;
+  color: var(--color-on-primary);
   border-color: transparent;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  box-shadow: 0 8px 20px rgba(77, 156, 255, 0.25);
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
+  box-shadow: 0 8px 20px rgba(124, 143, 255, 0.25);
 }
 
 .students-page__filter-count {
@@ -150,7 +150,7 @@
 }
 
 .students-page__table-row:hover {
-  background: rgba(77, 156, 255, 0.05);
+  background: rgba(124, 143, 255, 0.05);
 }
 
 .students-page__table tbody tr:last-child td {
@@ -187,12 +187,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(77, 156, 255, 0.15), rgba(34, 213, 235, 0.2));
+  background: linear-gradient(135deg, rgba(124, 143, 255, 0.15), rgba(45, 212, 191, 0.2));
   color: var(--color-primary);
   font-weight: 800;
   letter-spacing: 0.04em;
   flex-shrink: 0;
-  border: 1px solid rgba(77, 156, 255, 0.12);
+  border: 1px solid rgba(124, 143, 255, 0.12);
   transition: transform 150ms var(--ease-spring);
 }
 

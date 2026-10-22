@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   border: 0;
-  background: rgba(16, 42, 67, 0.28);
+  background: rgba(0, 0, 0, 0.6);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 39;
@@ -19,9 +19,9 @@
   display: grid;
   grid-template-rows: auto 1fr;
   gap: var(--space-5);
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--color-surface-glass);
   border-left: 1px solid var(--color-border);
-  box-shadow: -18px 0 40px rgba(16, 42, 67, 0.14);
+  box-shadow: var(--shadow-3);
   z-index: 40;
   animation: student-detail-drawer-slide-in 0.24s ease-out forwards;
 }
@@ -51,7 +51,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: var(--color-surface-soft);
   color: var(--color-text);
   cursor: pointer;
 }
@@ -71,7 +71,7 @@
   gap: var(--space-4);
   padding: var(--space-5);
   border-radius: var(--radius-2xl);
-  background: linear-gradient(135deg, rgba(21, 81, 140, 0.08), rgba(25, 167, 184, 0.08));
+  background: linear-gradient(135deg, var(--color-primary-soft), var(--color-secondary-soft));
   border: 1px solid var(--color-border);
 }
 
@@ -82,8 +82,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(21, 81, 140, 0.12), rgba(25, 167, 184, 0.2));
-  color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary-soft), var(--color-secondary-soft));
+  color: var(--color-on-soft-primary);
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -165,7 +165,7 @@
   overflow: auto;
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .student-detail-drawer__table {
@@ -188,7 +188,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: #f9fbff;
+  background: var(--color-surface-subtle);
 }
 
 .student-detail-drawer__table tbody tr:last-child td {
@@ -208,17 +208,17 @@
 }
 
 .student-detail-drawer__status--present {
-  color: var(--color-success);
+  color: var(--color-on-soft-success);
   background: var(--color-success-soft);
 }
 
 .student-detail-drawer__status--late {
-  color: var(--color-warning);
+  color: var(--color-on-soft-warning);
   background: var(--color-warning-soft);
 }
 
 .student-detail-drawer__status--absent {
-  color: var(--color-danger);
+  color: var(--color-on-soft-danger);
   background: var(--color-danger-soft);
 }
 

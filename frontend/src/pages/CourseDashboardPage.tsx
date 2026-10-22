@@ -16,6 +16,7 @@ import PageHeader from '../components/ui/PageHeader'
 import Button from '../components/ui/Button'
 import { getCourseDashboard, type CourseDashboardResponse } from '../features/courses/api/courseApi'
 import { useTopbarSetter } from '../context/TopbarContext'
+import { useTheme } from '../context/ThemeContext'
 import './CourseDashboardPage.css'
 
 const IconUsers = () => (
@@ -55,6 +56,15 @@ export default function CourseDashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const isMissingCourseId = !id
   const setTopbar = useTopbarSetter()
+  const { theme } = useTheme()
+  const isDarkTheme = theme === 'dark'
+  const chartColors = {
+    grid: isDarkTheme ? 'rgba(148, 163, 184, 0.18)' : 'rgba(71, 85, 105, 0.16)',
+    tick: isDarkTheme ? '#98a6c4' : '#51607a',
+    text: isDarkTheme ? '#e7ecf7' : '#0f172a',
+    present: isDarkTheme ? '#34d399' : '#15803d',
+    absent: isDarkTheme ? '#fb7185' : '#dc2626',
+  }
 
   useEffect(() => {
     setTopbar({
@@ -177,27 +187,29 @@ export default function CourseDashboardPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height={320}>
                     <LineChart data={data.weekly_summaries}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(95, 115, 137, 0.18)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                       <XAxis
                         dataKey="period_start"
                         tickFormatter={formatSummaryPeriod}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#5f7389', fontSize: 12 }}
+                        tick={{ fill: chartColors.tick, fontSize: 12 }}
                       />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#5f7389', fontSize: 12 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.tick, fontSize: 12 }} />
                       <Tooltip
                         labelFormatter={(label) => formatSummaryPeriod(String(label))}
+                        labelStyle={{ color: chartColors.text }}
+                        itemStyle={{ color: chartColors.text }}
                         contentStyle={{
-                          backgroundColor: '#ffffff',
+                          backgroundColor: 'var(--color-surface)',
                           borderRadius: '16px',
-                          border: '1px solid #d5e3f3',
-                          boxShadow: '0 12px 24px rgba(16, 42, 67, 0.12)',
+                          border: '1px solid var(--color-border-strong)',
+                          boxShadow: 'var(--shadow-2)',
                         }}
                       />
                       <Legend verticalAlign="top" height={36} />
-                      <Line type="monotone" dataKey="present_count" stroke="#13805c" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
-                      <Line type="monotone" dataKey="absent_count" stroke="#d64545" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
+                      <Line type="monotone" dataKey="present_count" stroke={chartColors.present} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
+                      <Line type="monotone" dataKey="absent_count" stroke={chartColors.absent} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
                     </LineChart>
                   </ResponsiveContainer>
                 )}
@@ -219,27 +231,29 @@ export default function CourseDashboardPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height={320}>
                     <LineChart data={data.monthly_summaries}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(95, 115, 137, 0.18)" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                       <XAxis
                         dataKey="period_start"
                         tickFormatter={formatSummaryPeriod}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#5f7389', fontSize: 12 }}
+                        tick={{ fill: chartColors.tick, fontSize: 12 }}
                       />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#5f7389', fontSize: 12 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.tick, fontSize: 12 }} />
                       <Tooltip
                         labelFormatter={(label) => formatSummaryPeriod(String(label))}
+                        labelStyle={{ color: chartColors.text }}
+                        itemStyle={{ color: chartColors.text }}
                         contentStyle={{
-                          backgroundColor: '#ffffff',
+                          backgroundColor: 'var(--color-surface)',
                           borderRadius: '16px',
-                          border: '1px solid #d5e3f3',
-                          boxShadow: '0 12px 24px rgba(16, 42, 67, 0.12)',
+                          border: '1px solid var(--color-border-strong)',
+                          boxShadow: 'var(--shadow-2)',
                         }}
                       />
                       <Legend verticalAlign="top" height={36} />
-                      <Line type="monotone" dataKey="present_count" stroke="#13805c" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
-                      <Line type="monotone" dataKey="absent_count" stroke="#d64545" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
+                      <Line type="monotone" dataKey="present_count" stroke={chartColors.present} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
+                      <Line type="monotone" dataKey="absent_count" stroke={chartColors.absent} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
                     </LineChart>
                   </ResponsiveContainer>
                 )}

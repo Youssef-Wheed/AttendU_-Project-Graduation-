@@ -46,7 +46,7 @@
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--color-text);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
 }
 
 .admin-modal-description {
@@ -116,25 +116,25 @@
 .admin-modal-submit,
 .admin-modal-danger {
   border: none !important;
-  color: #ffffff !important;
+  color: var(--color-on-primary) !important;
   box-shadow: var(--shadow-1);
 }
 
 .admin-modal-submit {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(135deg, var(--color-primary-strong), var(--color-secondary-strong));
 }
 
 .admin-modal-submit:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(77, 156, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(124, 143, 255, 0.35);
 }
 
 .admin-modal-danger {
-  background: var(--color-danger);
+  background: var(--color-danger-strong);
 }
 
 .admin-modal-danger:hover:not(:disabled) {
-  background: #d93e3e;
-  box-shadow: 0 8px 20px rgba(240, 82, 82, 0.3);
+  background: #be123c;
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35);
 }
 
 /* ─── Responsive ──────────────────────────────────────────── */

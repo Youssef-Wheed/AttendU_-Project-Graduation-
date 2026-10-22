@@ -48,7 +48,7 @@
 }
 
 .admin-data-table tbody tr:hover td {
-  background: rgba(77, 156, 255, 0.05);
+  background: rgba(124, 143, 255, 0.05);
 }
 
 .admin-table-align-left   { text-align: left; }
@@ -65,9 +65,9 @@
 
 .admin-table-actions button {
   min-height: 2.25rem;
-  background: rgba(77, 156, 255, 0.08);
+  background: rgba(124, 143, 255, 0.08);
   color: var(--color-primary);
-  border: 1px solid rgba(77, 156, 255, 0.15);
+  border: 1px solid rgba(124, 143, 255, 0.15);
   padding: 0 0.875rem;
   border-radius: var(--radius-md);
   font-weight: 700;
@@ -80,11 +80,11 @@
 }
 
 .admin-table-actions button:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #ffffff;
+  background: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+  color: var(--color-on-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(77, 156, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(124, 143, 255, 0.3);
 }
 
 .admin-table-actions button:active {
@@ -94,15 +94,15 @@
 
 .admin-table-actions .admin-danger-button {
   background: var(--color-danger-soft);
-  color: var(--color-danger);
-  border: 1px solid rgba(240, 82, 82, 0.2);
+  color: var(--color-on-soft-danger);
+  border: 1px solid rgba(251, 113, 133, 0.2);
 }
 
 .admin-table-actions .admin-danger-button:hover {
-  background: var(--color-danger);
-  border-color: var(--color-danger);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(240, 82, 82, 0.3);
+  background: var(--color-danger-strong);
+  border-color: var(--color-danger-strong);
+  color: var(--color-on-primary);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
 }
 
 /* ─── Skeleton ────────────────────────────────────────────── */

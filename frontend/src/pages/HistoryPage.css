@@ -75,7 +75,7 @@
 }
 
 .history-page__table tbody tr:hover {
-  background: rgba(77, 156, 255, 0.05);
+  background: rgba(124, 143, 255, 0.05);
 }
 
 .history-page__table tbody tr:last-child td {
@@ -91,13 +91,13 @@
 .history-page__status--active {
   color: var(--color-success);
   background: var(--color-success-soft);
-  border: 1px solid rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.15);
 }
 
 .history-page__status--completed {
   color: var(--color-primary);
   background: var(--color-primary-soft);
-  border: 1px solid rgba(77, 156, 255, 0.15);
+  border: 1px solid rgba(124, 143, 255, 0.15);
 }
 
 .history-page__status--neutral {

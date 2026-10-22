@@ -16,9 +16,9 @@
   padding: var(--space-9);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 15% 10%, rgba(77, 156, 255, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 85%, rgba(34, 213, 235, 0.12) 0%, transparent 55%),
-    linear-gradient(160deg, #080e1f 0%, #0c1630 45%, #091428 100%);
+    radial-gradient(ellipse at 15% 10%, rgba(124, 143, 255, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(45, 212, 191, 0.12) 0%, transparent 55%),
+    linear-gradient(160deg, #0b1020 0%, #131b2e 45%, #080d1a 100%);
 }
 
 /* Subtle grid overlay */
@@ -26,8 +26,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(77, 156, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to right, rgba(77, 156, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(124, 143, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to right, rgba(124, 143, 255, 0.04) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
 }
@@ -59,14 +59,14 @@
 }
 
 .login-left__links a {
-  color: rgba(221, 229, 244, 0.35);
+  color: rgba(231, 236, 247, 0.55);
   font-size: 0.78rem;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .login-left__links a:hover {
-  color: rgba(221, 229, 244, 0.75);
+  color: rgba(231, 236, 247, 0.85);
 }
 
 /* Ambient light blobs */
@@ -82,7 +82,7 @@
   height: 22rem;
   top: 15%;
   right: -4rem;
-  background: rgba(77, 156, 255, 0.1);
+  background: rgba(124, 143, 255, 0.1);
 }
 
 .login-left__blob--b {
@@ -90,7 +90,7 @@
   height: 30rem;
   bottom: -6rem;
   left: -6rem;
-  background: rgba(34, 213, 235, 0.07);
+  background: rgba(45, 212, 191, 0.07);
 }
 
 /* ─── RIGHT panel ────────────────────────────── */
@@ -148,9 +148,9 @@
 /* ─── Light mode — left panel adjustments ─────── */
 html[data-theme="light"] .login-left {
   background:
-    radial-gradient(ellipse at 15% 10%, rgba(43, 127, 224, 0.2) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 85%, rgba(15, 191, 214, 0.14) 0%, transparent 55%),
-    linear-gradient(160deg, #0d1f42 0%, #122050 45%, #0b1a3a 100%);
+    radial-gradient(ellipse at 15% 10%, rgba(59, 91, 219, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(15, 118, 110, 0.14) 0%, transparent 55%),
+    linear-gradient(160deg, #101a38 0%, #17234b 45%, #0c1430 100%);
 }
 
 html[data-theme="light"] .login-right {
