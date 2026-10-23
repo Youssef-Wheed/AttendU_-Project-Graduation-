@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timezone
+from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
 
@@ -57,8 +57,8 @@ async def list_attendance_sessions(
     course_id: UUID | None = Query(default=None),
     section_id: UUID | None = Query(default=None),
     course_code: str | None = Query(default=None),
-    start_date: date | None = Query(default=None),
-    end_date: date | None = Query(default=None),
+    start_date: datetime | None = Query(default=None),
+    end_date: datetime | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     db: AsyncSession = Depends(async_get_db),
@@ -67,16 +67,12 @@ async def list_attendance_sessions(
     # Keep closing expired windows (and storing their Absent rows) before listing.
     await attendance_session_controller.close_expired_sessions(db)
 
-    date_from = (
-        datetime.combine(start_date, time.min, tzinfo=timezone.utc)
-        if start_date
-        else None
-    )
-    date_to = (
-        datetime.combine(end_date, time.max, tzinfo=timezone.utc)
-        if end_date
-        else None
-    )
+    date_from = start_date
+    date_to = end_date
+    if date_from is not None and date_from.tzinfo is None:
+        date_from = date_from.replace(tzinfo=timezone.utc)
+    if date_to is not None and date_to.tzinfo is None:
+        date_to = date_to.replace(tzinfo=timezone.utc)
 
     return await reports_controller.list_attendance_sessions(
         db,

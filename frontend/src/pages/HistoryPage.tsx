@@ -32,6 +32,12 @@ const formatDate = (value: string) => {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(parsed)
 }
 
+const toStartOfDayIso = (value: string): string | undefined =>
+  value ? new Date(`${value}T00:00:00`).toISOString() : undefined
+
+const toEndOfDayIso = (value: string): string | undefined =>
+  value ? new Date(`${value}T23:59:59.999`).toISOString() : undefined
+
 const getSessionPercentage = (session: AttendanceSessionHistoryResponse): number | null => {
   const percentage = session.attendance_percentage ?? session.percentage
   if (typeof percentage === 'number' && Number.isFinite(percentage)) {
@@ -142,8 +148,8 @@ export default function HistoryPage() {
       try {
         const response = await getAttendanceSessionsHistory({
           course_code: courseCodeFilter.trim() || undefined,
-          start_date: startDateFilter || undefined,
-          end_date: endDateFilter || undefined,
+          start_date: toStartOfDayIso(startDateFilter),
+          end_date: toEndOfDayIso(endDateFilter),
         })
         if (!isActive) {
           return
