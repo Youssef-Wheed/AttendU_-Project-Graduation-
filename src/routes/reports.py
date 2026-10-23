@@ -22,6 +22,7 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 async def list_attendance_reports(
     course_id: UUID | None = Query(default=None),
     section_id: UUID | None = Query(default=None),
+    course_code: str | None = Query(default=None),
     date_from: datetime | None = Query(default=None),
     date_to: datetime | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
@@ -35,6 +36,7 @@ async def list_attendance_reports(
         current_user,
         course_id=course_id,
         section_id=section_id,
+        course_code=course_code,
         date_from=date_from,
         date_to=date_to,
         offset=offset,

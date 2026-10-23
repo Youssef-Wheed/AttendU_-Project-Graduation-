@@ -153,15 +153,47 @@ class AttendanceCheckInController:
                 checked_at=checked_at,
             )
 
-        attendance_event = AttendanceEvent(
-            student_id=payload.student_id,
-            attendance_session_id=payload.attendance_session_id,
-            section_id=session.section_id,
-            device_id=payload.device_id,
-            method_used=payload.method_used,
-            final_status="Present",
+        existing_event = await db.scalar(
+            select(AttendanceEvent).where(
+                AttendanceEvent.student_id == payload.student_id,
+                AttendanceEvent.attendance_session_id
+                == payload.attendance_session_id,
+            )
         )
-        db.add(attendance_event)
+        if existing_event is not None and existing_event.final_status != "Absent":
+            await self._append_audit(
+                db,
+                event_type="checkin_failed",
+                message="check-in rejected: duplicate record for student/session",
+                metadata_json=payload.model_dump(mode="json"),
+            )
+            await db.commit()
+            return AttendanceValidationResult(
+                accepted=False,
+                reason="attendance already recorded for this session",
+                checked_at=checked_at,
+            )
+
+        if existing_event is not None:
+            # The student was marked Absent when the session closed. A late
+            # check-in (for example after the session was re-activated) turns
+            # that row into Present instead of violating the unique constraint.
+            attendance_event = existing_event
+            attendance_event.section_id = session.section_id
+            attendance_event.device_id = payload.device_id
+            attendance_event.method_used = payload.method_used
+            attendance_event.final_status = "Present"
+        else:
+            attendance_event = AttendanceEvent(
+                student_id=payload.student_id,
+                attendance_session_id=payload.attendance_session_id,
+                section_id=session.section_id,
+                device_id=payload.device_id,
+                method_used=payload.method_used,
+                final_status="Present",
+            )
+            db.add(attendance_event)
+
         await self._append_audit(
             db,
             event_type="checkin_success",

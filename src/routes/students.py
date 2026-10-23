@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.crud.student_controller import student_controller
+from helpers.attendance_stats import get_student_attendance_stats
 from helpers.database import async_get_db
 from helpers.dependencies import get_current_user, ensure_admin
 from Models import User
@@ -20,6 +21,15 @@ from services.face_recognition_service import register_face, invalidate_cache
 
 
 router = APIRouter(prefix="/students", tags=["students"])
+
+
+async def _attach_attendance_rates(
+    db: AsyncSession, students: list
+) -> list:
+    stats = await get_student_attendance_stats(db, [student.id for student in students])
+    for student in students:
+        student.attendance_rate = stats[student.id]["percentage"]
+    return students
 
 
 @router.post("", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
@@ -46,7 +56,8 @@ async def list_students(
     db: AsyncSession = Depends(async_get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await student_controller.list_all(db, offset=offset, limit=limit)
+    students = await student_controller.list_all(db, offset=offset, limit=limit)
+    return await _attach_attendance_rates(db, students)
 
 
 @router.get("/search", response_model=List[StudentResponse])
@@ -57,7 +68,10 @@ async def search_students(
     db: AsyncSession = Depends(async_get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await student_controller.search(db, query=query, offset=offset, limit=limit)
+    students = await student_controller.search(
+        db, query=query, offset=offset, limit=limit
+    )
+    return await _attach_attendance_rates(db, students)
 
 
 @router.get("/{student_id}", response_model=StudentResponse)
@@ -71,6 +85,7 @@ async def get_student(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="student not found"
         )
+    await _attach_attendance_rates(db, [student])
     return student
 
 

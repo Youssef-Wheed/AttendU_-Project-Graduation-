@@ -15,12 +15,29 @@ class StudentController(CRUDBaseController[Student]):
         super().__init__(Student)
 
     async def _load_with_enrollments(self, db: AsyncSession, student_id: UUID) -> Student:
+        student = await self.get_by_id(db, student_id)
+        if student is None:
+            raise ValueError("student not found")
+        return student
+
+    async def get_by_id(self, db: AsyncSession, entity_id: UUID) -> Student | None:
         result = await db.execute(
             select(Student)
             .options(selectinload(Student.enrollments))
-            .where(Student.id == student_id)
+            .where(Student.id == entity_id)
         )
-        return result.scalar_one()
+        return result.scalar_one_or_none()
+
+    async def list_all(
+        self, db: AsyncSession, *, offset: int = 0, limit: int = 100
+    ) -> list[Student]:
+        result = await db.execute(
+            select(Student)
+            .options(selectinload(Student.enrollments))
+            .offset(max(offset, 0))
+            .limit(max(min(limit, 200), 1))
+        )
+        return list(result.scalars().all())
 
     async def create_student(self, db: AsyncSession, payload: StudentCreate) -> Student:
         data = payload.model_dump()
@@ -64,6 +81,7 @@ class StudentController(CRUDBaseController[Student]):
     ) -> list[Student]:
         stmt = (
             select(Student)
+            .options(selectinload(Student.enrollments))
             .where(
                 or_(
                     Student.full_name.ilike(f"%{query}%"),

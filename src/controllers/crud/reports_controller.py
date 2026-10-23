@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from Models import AttendanceEvent, AttendanceSession, Course, Enrollment, Section, Student, User
+from helpers.attendance_stats import get_session_attendance_stats
 
 
 class ReportsController:
@@ -15,34 +16,12 @@ class ReportsController:
         *,
         course_id: UUID | None = None,
         section_id: UUID | None = None,
+        course_code: str | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None,
         offset: int = 0,
         limit: int = 50,
     ) -> list[dict]:
-        present_counts_subquery = (
-            select(
-                AttendanceEvent.attendance_session_id.label("session_id"),
-                func.count(func.distinct(AttendanceEvent.student_id)).label(
-                    "present_count"
-                ),
-            )
-            .where(AttendanceEvent.final_status == "Present")
-            .group_by(AttendanceEvent.attendance_session_id)
-            .subquery()
-        )
-
-        total_students_subquery = (
-            select(
-                Enrollment.section_id.label("section_id"),
-                func.count(func.distinct(Enrollment.student_id)).label(
-                    "total_students"
-                ),
-            )
-            .group_by(Enrollment.section_id)
-            .subquery()
-        )
-
         stmt = (
             select(
                 AttendanceSession.id.label("id"),
@@ -58,24 +37,11 @@ class ReportsController:
                 AttendanceSession.start_time.label("start_time"),
                 AttendanceSession.end_time.label("end_time"),
                 AttendanceSession.is_active.label("is_active"),
-                func.coalesce(present_counts_subquery.c.present_count, 0).label(
-                    "present_count"
-                ),
-                func.coalesce(total_students_subquery.c.total_students, 0).label(
-                    "total_students"
-                ),
+                AttendanceSession.verification_method.label("verification_method"),
             )
             .select_from(AttendanceSession)
             .join(Section, Section.id == AttendanceSession.section_id)
             .join(Course, Course.id == Section.course_id)
-            .outerjoin(
-                present_counts_subquery,
-                AttendanceSession.id == present_counts_subquery.c.session_id,
-            )
-            .outerjoin(
-                total_students_subquery,
-                AttendanceSession.section_id == total_students_subquery.c.section_id,
-            )
         )
 
         if current_user.role != "admin":
@@ -87,6 +53,9 @@ class ReportsController:
         if section_id is not None:
             stmt = stmt.where(AttendanceSession.section_id == section_id)
 
+        if course_code:
+            stmt = stmt.where(Course.course_code.ilike(course_code.strip()))
+
         if date_from is not None:
             stmt = stmt.where(AttendanceSession.start_time >= date_from)
 
@@ -97,6 +66,10 @@ class ReportsController:
         stmt = stmt.offset(max(offset, 0)).limit(max(min(limit, 200), 1))
 
         rows = (await db.execute(stmt)).all()
+        stats_by_session = await get_session_attendance_stats(
+            db, [row.id for row in rows]
+        )
+
         return [
             {
                 "id": row.id,
@@ -112,12 +85,14 @@ class ReportsController:
                 "start_time": row.start_time,
                 "end_time": row.end_time,
                 "is_active": row.is_active,
-                "present_count": row.present_count,
-                "total_students": row.total_students,
-                "attendance_percentage": (
-                    round((row.present_count / row.total_students) * 100, 2)
-                    if row.total_students
-                    else 0.0
+                "verification_method": row.verification_method,
+                **stats_by_session.get(
+                    row.id,
+                    {
+                        "present_count": 0,
+                        "total_students": 0,
+                        "attendance_percentage": 0.0,
+                    },
                 ),
             }
             for row in rows

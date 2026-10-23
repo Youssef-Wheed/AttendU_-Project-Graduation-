@@ -29,7 +29,4 @@ class Student(Base, BaseDataModel):
 
     @property
     def section_ids(self) -> list[UUID]:
-        try:
-            return [e.section_id for e in self.enrollments]
-        except Exception:
-            return []
+        return [e.section_id for e in self.enrollments]

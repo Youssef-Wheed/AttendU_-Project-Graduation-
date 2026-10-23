@@ -31,6 +31,7 @@ class StudentResponse(TimestampedResponse):
     rfid_uid: str
     face_reference_image: str | None
     section_ids: list[UUID] = Field(default_factory=list)
+    attendance_rate: float = 0.0
 
 
 class StudentFaceRegistrationResponse(ORMModel):

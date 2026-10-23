@@ -11,6 +11,7 @@ export interface StudentApiResponse extends TimestampedEntity {
   rfid_uid: string
   face_reference_image: string | null
   section_ids: string[]
+  attendance_rate?: number
 }
 
 export interface StudentApiUpsertPayload {

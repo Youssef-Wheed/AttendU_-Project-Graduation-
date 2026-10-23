@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from controllers.crud.section_controller import section_controller
 from controllers.crud.student_controller import student_controller
@@ -88,6 +89,7 @@ async def list_students_in_section(
 
     result = await db.execute(
         select(Student)
+        .options(selectinload(Student.enrollments))
         .join(Enrollment, Enrollment.student_id == Student.id)
         .where(Enrollment.section_id == section_id)
         .offset(offset)

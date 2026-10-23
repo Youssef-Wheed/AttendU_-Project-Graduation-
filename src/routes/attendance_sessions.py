@@ -1,3 +1,4 @@
+from datetime import date, datetime, time, timezone
 from typing import List
 from uuid import UUID
 
@@ -7,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.crud.attendance_session_controller import attendance_session_controller
+from controllers.crud.reports_controller import reports_controller
 from helpers.database import async_get_db
 from helpers.dependencies import (
     ensure_admin_or_self,
@@ -52,17 +54,41 @@ async def create_attendance_session(
 
 @router.get("", response_model=List[AttendanceSessionResponse])
 async def list_attendance_sessions(
+    course_id: UUID | None = Query(default=None),
+    section_id: UUID | None = Query(default=None),
+    course_code: str | None = Query(default=None),
+    start_date: date | None = Query(default=None),
+    end_date: date | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     db: AsyncSession = Depends(async_get_db),
     current_user: User = Depends(get_current_user),
 ):
-    sessions = await attendance_session_controller.list_all(
-        db, offset=offset, limit=limit
+    # Keep closing expired windows (and storing their Absent rows) before listing.
+    await attendance_session_controller.close_expired_sessions(db)
+
+    date_from = (
+        datetime.combine(start_date, time.min, tzinfo=timezone.utc)
+        if start_date
+        else None
     )
-    if current_user.role == "admin":
-        return sessions
-    return [session for session in sessions if session.created_by_id == current_user.id]
+    date_to = (
+        datetime.combine(end_date, time.max, tzinfo=timezone.utc)
+        if end_date
+        else None
+    )
+
+    return await reports_controller.list_attendance_sessions(
+        db,
+        current_user,
+        course_id=course_id,
+        section_id=section_id,
+        course_code=course_code,
+        date_from=date_from,
+        date_to=date_to,
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.get("/active", response_model=List[AttendanceSessionResponse])

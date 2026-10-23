@@ -33,4 +33,11 @@ class AttendanceSessionResponse(TimestampedResponse):
     end_time: datetime
     is_active: bool
     verification_method: str
+    section_name: str | None = None
+    course_id: UUID | None = None
+    course_name: str | None = None
+    course_code: str | None = None
+    present_count: int | None = None
+    total_students: int | None = None
+    attendance_percentage: float | None = None
 

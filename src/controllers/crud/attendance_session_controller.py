@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from Models import AttendanceSession
 from controllers.base_controller import CRUDBaseController
+from helpers.attendance_stats import insert_absent_events
 from Models.schemas.attendance_session import (
     AttendanceSessionCreate,
     AttendanceSessionUpdate,
@@ -40,14 +41,20 @@ class AttendanceSessionController(CRUDBaseController[AttendanceSession]):
             update(AttendanceSession)
             .where(and_(*conditions))
             .values(is_active=False, updated_at=func.now())
-            .returning(AttendanceSession.id)
+            .returning(AttendanceSession.id, AttendanceSession.section_id)
             .execution_options(synchronize_session=False)
         )
         result = await db.execute(stmt)
-        closed_ids = list(result.scalars().all())
-        if closed_ids:
+        closed_sessions = result.all()
+        for session_id, section_id in closed_sessions:
+            await insert_absent_events(
+                db,
+                session_id=session_id,
+                section_id=section_id,
+            )
+        if closed_sessions:
             await db.commit()
-        return closed_ids
+        return [session_id for session_id, _ in closed_sessions]
 
     async def create_session(
         self,
@@ -115,7 +122,18 @@ class AttendanceSessionController(CRUDBaseController[AttendanceSession]):
             end_time = now  # stopped early: close immediately
         else:
             end_time = session.end_time  # not started yet: keep the planned end
-        return await self.update(db, session, {"is_active": False, "end_time": end_time})
+
+        session.is_active = False
+        session.end_time = end_time
+        await db.flush()
+        await insert_absent_events(
+            db,
+            session_id=session.id,
+            section_id=session.section_id,
+        )
+        await db.commit()
+        await db.refresh(session)
+        return session
 
     async def list_active(self, db: AsyncSession) -> list[AttendanceSession]:
         await self.close_expired_sessions(db)

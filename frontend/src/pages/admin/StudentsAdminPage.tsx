@@ -43,7 +43,7 @@ const toStudentRow = (student: StudentApiResponse): StudentAdminRow => ({
   email: student.email,
   rfidUid: student.rfid_uid,
   sectionCount: student.section_ids?.length ?? 0,
-  attendanceRate: 0,
+  attendanceRate: student.attendance_rate ?? 0,
 })
 
 const toStudentPayload = (formState: StudentFormPayload): StudentApiUpsertPayload => ({
@@ -217,7 +217,7 @@ export default function StudentsAdminPage() {
       email: currentStudent.email,
       rfidUid: currentStudent.rfid_uid,
       sectionCount: currentStudent.section_ids?.length ?? 0,
-      attendanceRate: 0,
+      attendanceRate: currentStudent.attendance_rate ?? 0,
     }
     void handleEditImpl(row, currentStudent)
   }, [detailStudent, studentsById, handleEditImpl])
