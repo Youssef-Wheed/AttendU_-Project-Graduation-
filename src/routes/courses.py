@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.crud.course_controller import course_controller
+from helpers.audit import build_changes, log_action
 from helpers.database import async_get_db
 from helpers.dependencies import (
     get_current_user,
@@ -32,7 +33,17 @@ async def create_course(
 ):
     ensure_admin(current_user)
     try:
-        return await course_controller.create_course(db, payload)
+        course = await course_controller.create_course(db, payload)
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="course.created",
+            entity_type="course",
+            entity_id=course.id,
+            entity_label=f"{course.course_code} - {course.course_name}",
+            source="api",
+        )
+        return course
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(
@@ -133,7 +144,20 @@ async def update_course(
         )
 
     try:
-        return await course_controller.update_course(db, course, payload)
+        changes = build_changes(course, payload.model_dump(exclude_unset=True))
+        updated_course = await course_controller.update_course(db, course, payload)
+        if changes:
+            await log_action(
+                db,
+                actor_user_id=current_user.id,
+                action="course.updated",
+                entity_type="course",
+                entity_id=updated_course.id,
+                entity_label=f"{updated_course.course_code} - {updated_course.course_name}",
+                changes=changes,
+                source="api",
+            )
+        return updated_course
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(
@@ -155,3 +179,12 @@ async def delete_course(
             status_code=status.HTTP_404_NOT_FOUND, detail="course not found"
         )
     await course_controller.delete(db, course)
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="course.deleted",
+        entity_type="course",
+        entity_id=course.id,
+        entity_label=f"{course.course_code} - {course.course_name}",
+        source="api",
+    )

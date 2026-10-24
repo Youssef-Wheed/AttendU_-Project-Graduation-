@@ -71,3 +71,35 @@ export interface UserApiCreatePayload {
   password?: string
   role: string
 }
+
+export interface AuditLogEntry {
+  id: string
+  created_at: string
+  updated_at: string
+  actor_user_id: string | null
+  actor_name: string
+  event_type: string
+  action_source: string
+  message: string
+  metadata_json: Record<string, unknown> | null
+  action: string
+  entity_type: string | null
+  entity_id: string | null
+  entity_label: string | null
+}
+
+export interface AuditLogPageResponse {
+  items: AuditLogEntry[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface AuditLogFilters {
+  action?: string
+  entity_type?: string
+  actor?: string
+  date_from?: string
+  date_to?: string
+  search?: string
+}

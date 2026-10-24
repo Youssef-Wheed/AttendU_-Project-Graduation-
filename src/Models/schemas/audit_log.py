@@ -30,3 +30,18 @@ class AuditLogResponse(TimestampedResponse):
     action_source: AuditActionSource
     message: str
     metadata_json: dict | None
+
+
+class AuditLogEntryResponse(AuditLogResponse):
+    actor_name: str
+    action: str
+    entity_type: str | None = None
+    entity_id: str | None = None
+    entity_label: str | None = None
+
+
+class AuditLogPageResponse(ORMModel):
+    items: list[AuditLogEntryResponse]
+    total: int
+    page: int
+    page_size: int

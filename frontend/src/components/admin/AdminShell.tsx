@@ -25,6 +25,7 @@ const routeTitles: Record<string, string> = {
   '/admin/sections': 'Sections',
   '/admin/devices': 'Devices',
   '/admin/enrollments': 'Enrollments',
+  '/admin/activity-log': 'Activity Log',
 }
 
 const routeDescriptions: Record<string, string> = {
@@ -34,6 +35,7 @@ const routeDescriptions: Record<string, string> = {
   '/admin/sections': 'Connect sections to courses, schedules, and instructors with the same shared forms and tables.',
   '/admin/devices': 'Review attendance devices, locations, methods, and status within the unified control panel.',
   '/admin/enrollments': 'Add and remove students from sections without leaving the standardized admin workflow.',
+  '/admin/activity-log': 'Review important account, academic, enrollment, and attendance actions.',
 }
 
 const getDefaultTopBarConfig = (pathname: string): AdminTopBarConfig => ({

@@ -4,6 +4,7 @@ from helpers.dependencies import get_current_user
 from Models import User
 from routes.attendance_checkin import router as attendance_checkin_router
 from routes.attendance_sessions import router as attendance_sessions_router
+from routes.audit_logs import router as audit_logs_router
 from routes.auth import router as auth_router
 from routes.courses import router as courses_router
 from routes.devices import router as devices_router
@@ -35,6 +36,7 @@ base_router.include_router(courses_router)
 base_router.include_router(sections_router)
 base_router.include_router(devices_router)
 base_router.include_router(attendance_sessions_router)
+base_router.include_router(audit_logs_router)
 base_router.include_router(attendance_checkin_router)
 base_router.include_router(reports_router)
 base_router.include_router(auth_router)

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.crud.attendance_session_controller import attendance_session_controller
 from controllers.crud.reports_controller import reports_controller
+from helpers.audit import build_changes, log_action
 from helpers.database import async_get_db
 from helpers.dependencies import (
     ensure_admin_or_self,
@@ -39,7 +40,17 @@ async def create_attendance_session(
     ensure_admin_or_self(current_user, payload.created_by_id)
     await ensure_section_access(db, current_user, payload.section_id, write=True)
     try:
-        return await attendance_session_controller.create_session(db, payload)
+        session = await attendance_session_controller.create_session(db, payload)
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="attendance_session.started",
+            entity_type="attendance_session",
+            entity_id=session.id,
+            entity_label=session.title,
+            source="api",
+        )
+        return session
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
@@ -129,7 +140,17 @@ async def stop_attendance_session(
         # Idempotent stop: the session may already have been auto-closed
         # because its window elapsed. Return the closed session as-is.
         return session
-    return await attendance_session_controller.stop_session(db, session)
+    stopped_session = await attendance_session_controller.stop_session(db, session)
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="attendance_session.stopped",
+        entity_type="attendance_session",
+        entity_id=stopped_session.id,
+        entity_label=stopped_session.title,
+        source="api",
+    )
+    return stopped_session
 
 
 @router.post("/{session_id}/preload-faces", status_code=status.HTTP_200_OK)
@@ -182,7 +203,22 @@ async def update_attendance_session(
         )
 
     try:
-        return await attendance_session_controller.update_session(db, session, payload)
+        changes = build_changes(session, payload.model_dump(exclude_unset=True))
+        updated_session = await attendance_session_controller.update_session(
+            db, session, payload
+        )
+        if changes:
+            await log_action(
+                db,
+                actor_user_id=current_user.id,
+                action="attendance_session.updated",
+                entity_type="attendance_session",
+                entity_id=updated_session.id,
+                entity_label=updated_session.title,
+                changes=changes,
+                source="api",
+            )
+        return updated_session
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
@@ -208,4 +244,12 @@ async def delete_attendance_session(
             status_code=status.HTTP_404_NOT_FOUND, detail="session not found"
         )
     await attendance_session_controller.delete(db, session)
-
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="attendance_session.deleted",
+        entity_type="attendance_session",
+        entity_id=session.id,
+        entity_label=session.title,
+        source="api",
+    )

@@ -16,6 +16,7 @@ const sanitizeFilename = (filename: string): string => {
 export const exportToCSV = (
   data: Record<string, unknown>[],
   filename: string,
+  options: { includeBom?: boolean } = {},
 ): void => {
   if (data.length === 0) {
     return
@@ -36,7 +37,8 @@ export const exportToCSV = (
   ]
 
   const csvContent = csvRows.join('\n')
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const content = options.includeBom ? `\uFEFF${csvContent}` : csvContent
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const objectUrl = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
 

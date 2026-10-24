@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from controllers.crud.section_controller import section_controller
 from controllers.crud.student_controller import student_controller
+from helpers.audit import build_changes, log_action
 from helpers.database import async_get_db
 from helpers.dependencies import (
     ensure_admin_or_self,
@@ -30,7 +31,17 @@ async def create_section(
 ):
     ensure_admin_or_self(current_user, payload.instructor_id)
     try:
-        return await section_controller.create_section(db, payload)
+        section = await section_controller.create_section(db, payload)
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="section.created",
+            entity_type="section",
+            entity_id=section.id,
+            entity_label=section.section_name,
+            source="api",
+        )
+        return section
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
@@ -132,6 +143,16 @@ async def enroll_student_in_section(
 
     db.add(Enrollment(student_id=student_id, section_id=section_id))
     await db.commit()
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="enrollment.added",
+        entity_type="enrollment",
+        entity_id=student_id,
+        entity_label=f"{student.full_name} in section {section_id}",
+        changes={"section_id": {"new": str(section_id)}},
+        source="api",
+    )
 
     return student
 
@@ -160,8 +181,19 @@ async def remove_student_from_section(
             detail="enrollment not found",
         )
 
+    student = await student_controller.get_by_id(db, student_id)
     await db.delete(enrollment)
     await db.commit()
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="enrollment.removed",
+        entity_type="enrollment",
+        entity_id=student_id,
+        entity_label=f"{student.full_name if student else student_id} from section {section_id}",
+        changes={"section_id": {"old": str(section_id)}},
+        source="api",
+    )
 
 
 @router.put("/{section_id}", response_model=SectionResponse)
@@ -179,7 +211,20 @@ async def update_section(
         )
 
     try:
-        return await section_controller.update_section(db, section, payload)
+        changes = build_changes(section, payload.model_dump(exclude_unset=True))
+        updated_section = await section_controller.update_section(db, section, payload)
+        if changes:
+            await log_action(
+                db,
+                actor_user_id=current_user.id,
+                action="section.updated",
+                entity_type="section",
+                entity_id=updated_section.id,
+                entity_label=updated_section.section_name,
+                changes=changes,
+                source="api",
+            )
+        return updated_section
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
@@ -205,3 +250,12 @@ async def delete_section(
             status_code=status.HTTP_404_NOT_FOUND, detail="section not found"
         )
     await section_controller.delete(db, section)
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="section.deleted",
+        entity_type="section",
+        entity_id=section.id,
+        entity_label=section.section_name,
+        source="api",
+    )

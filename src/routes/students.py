@@ -15,6 +15,7 @@ from helpers.attendance_stats import (
     get_student_attendance_stats,
     get_student_course_attendance_stats,
 )
+from helpers.audit import build_changes, log_action
 from helpers.database import async_get_db
 from helpers.dependencies import get_current_user, ensure_admin
 from Models import AttendanceEvent, AttendanceSession, Course, Enrollment, Section, User
@@ -48,7 +49,17 @@ async def create_student(
 ):
     ensure_admin(current_user)
     try:
-        return await student_controller.create_student(db, payload)
+        student = await student_controller.create_student(db, payload)
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="student.created",
+            entity_type="student",
+            entity_id=student.id,
+            entity_label=student.full_name,
+            source="api",
+        )
+        return student
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(
@@ -296,10 +307,20 @@ async def register_student_face(
     invalidate_cache(student_id)
 
     # Update student record
-    await student_controller.update_student(
+    updated_student = await student_controller.update_student(
         db,
         student,
         StudentUpdate(face_reference_image=file_path),
+    )
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="student.face_registered",
+        entity_type="student",
+        entity_id=updated_student.id,
+        entity_label=updated_student.full_name,
+        changes={"face_reference_image": {"changed": True}},
+        source="api",
     )
 
     return StudentFaceRegistrationResponse(
@@ -325,7 +346,21 @@ async def update_student(
         )
 
     try:
-        return await student_controller.update_student(db, student, payload)
+        updates = payload.model_dump(exclude_unset=True)
+        changes = build_changes(student, updates)
+        updated_student = await student_controller.update_student(db, student, payload)
+        if changes:
+            await log_action(
+                db,
+                actor_user_id=current_user.id,
+                action="student.updated",
+                entity_type="student",
+                entity_id=updated_student.id,
+                entity_label=updated_student.full_name,
+                changes=changes,
+                source="api",
+            )
+        return updated_student
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(
@@ -347,3 +382,12 @@ async def delete_student(
             status_code=status.HTTP_404_NOT_FOUND, detail="student not found"
         )
     await student_controller.delete(db, student)
+    await log_action(
+        db,
+        actor_user_id=current_user.id,
+        action="student.deleted",
+        entity_type="student",
+        entity_id=student.id,
+        entity_label=student.full_name,
+        source="api",
+    )

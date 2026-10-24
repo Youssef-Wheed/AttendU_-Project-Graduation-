@@ -84,6 +84,7 @@ function AppLayoutInner() {
           { path: '/admin/sections',    label: 'Sections',    icon: <IconSections size={16} /> },
           { path: '/admin/devices',     label: 'Devices',     icon: <IconDevices size={16} /> },
           { path: '/admin/enrollments', label: 'Enrollments', icon: <IconEnrollments size={16} /> },
+          { path: '/admin/activity-log', label: 'Activity Log', icon: <IconHistory size={16} /> },
         ],
       })
     }

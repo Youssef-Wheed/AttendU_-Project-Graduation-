@@ -11,6 +11,7 @@ import EnrollmentsAdminPage from './pages/admin/EnrollmentsAdminPage'
 import SectionsAdminPage from './pages/admin/SectionsAdminPage'
 import StudentsAdminPage from './pages/admin/StudentsAdminPage'
 import UsersAdminPage from './pages/admin/UsersAdminPage'
+import ActivityLogPage from './pages/admin/ActivityLogPage'
 import CourseDashboardPage from './pages/CourseDashboardPage'
 import DashboardPage from './pages/DashboardPage'
 import HistoryPage from './pages/HistoryPage'
@@ -68,6 +69,7 @@ function App() {
               <Route path="sections" element={<SectionsAdminPage />} />
               <Route path="devices" element={<DevicesAdminPage />} />
               <Route path="enrollments" element={<EnrollmentsAdminPage />} />
+              <Route path="activity-log" element={<ActivityLogPage />} />
             </Route>
           </Route>
         </Route>

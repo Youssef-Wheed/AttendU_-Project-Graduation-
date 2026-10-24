@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from uuid import UUID
 
 from controllers.crud.user_controller import user_controller
+from helpers.audit import log_action
 from helpers.database import async_get_db
 from helpers.dependencies import ensure_admin, get_current_user
 from Models import User
@@ -32,7 +33,17 @@ async def create_user(
 ):
     ensure_admin(current_user)
     try:
-        return await user_controller.create_user(db, payload.model_dump())
+        user = await user_controller.create_user(db, payload.model_dump())
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="user.created",
+            entity_type="user",
+            entity_id=user.id,
+            entity_label=user.full_name,
+            source="api",
+        )
+        return user
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(
@@ -48,4 +59,15 @@ async def delete_user(
     current_user: User = Depends(get_current_user),
 ):
     ensure_admin(current_user)
+    user = await user_controller.get_by_id(db, user_id)
     await user_controller.delete_user(db, user_id)
+    if user:
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="user.deleted",
+            entity_type="user",
+            entity_id=user.id,
+            entity_label=user.full_name,
+            source="api",
+        )
