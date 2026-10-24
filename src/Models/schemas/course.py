@@ -23,6 +23,8 @@ class CourseResponse(TimestampedResponse):
 
 class CourseStudentAttendanceResponse(StudentResponse):
     attendance_percentage: float
+    present_count: int
+    total_sessions: int
 
 
 class CourseAttendanceSummary(ORMModel):

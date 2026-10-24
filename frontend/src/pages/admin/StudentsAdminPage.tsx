@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 
 import type { AdminTopBarConfig } from '../../components/admin/AdminShell'
 import AdminFormModal from '../../components/admin/AdminFormModal'
@@ -155,7 +156,18 @@ export default function StudentsAdminPage() {
 
   const columns = useMemo<DataTableColumn<StudentAdminRow>[]>(
     () => [
-      { id: 'fullName', header: 'Student', cell: (row) => row.fullName },
+      {
+        id: 'fullName',
+        header: 'Student',
+        cell: (row) => (
+          <Link
+            to={`/students/${row.id}/report`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {row.fullName}
+          </Link>
+        ),
+      },
       { id: 'email', header: 'Email', cell: (row) => row.email },
       { id: 'rfidUid', header: 'RFID UID', cell: (row) => row.rfidUid },
       { id: 'sectionCount', header: 'Sections', align: 'center', cell: (row) => row.sectionCount },
@@ -164,6 +176,20 @@ export default function StudentsAdminPage() {
         header: 'Attendance %',
         align: 'right',
         cell: (row) => `${row.attendanceRate.toFixed(1)}%`,
+      },
+      {
+        id: 'report',
+        header: 'Report',
+        align: 'center',
+        cell: (row) => (
+          <Link
+            className="ui-button ui-button--secondary ui-button--sm"
+            to={`/students/${row.id}/report`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            Report
+          </Link>
+        ),
       },
     ],
     [],

@@ -1,19 +1,27 @@
+from datetime import datetime, timezone
 from fastapi.responses import JSONResponse
 from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.crud.student_controller import student_controller
-from helpers.attendance_stats import get_student_attendance_stats
+from helpers.attendance_stats import (
+    ATTENDED_STATUSES,
+    ended_session_condition,
+    get_student_attendance_stats,
+    get_student_course_attendance_stats,
+)
 from helpers.database import async_get_db
 from helpers.dependencies import get_current_user, ensure_admin
-from Models import User
+from Models import AttendanceEvent, AttendanceSession, Course, Enrollment, Section, User
 from Models.schemas.student import (
     StudentCreate,
     StudentFaceRegistrationResponse,
+    StudentReportResponse,
     StudentResponse,
     StudentUpdate,
 )
@@ -87,6 +95,150 @@ async def get_student(
         )
     await _attach_attendance_rates(db, [student])
     return student
+
+
+@router.get("/{student_id}/report", response_model=StudentReportResponse)
+async def get_student_report(
+    student_id: UUID,
+    db: AsyncSession = Depends(async_get_db),
+    current_user: User = Depends(get_current_user),
+):
+    student = await student_controller.get_by_id(db, student_id)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="student not found"
+        )
+
+    generated_at = datetime.now(timezone.utc)
+    overall_stats = await get_student_attendance_stats(
+        db, [student_id], now=generated_at
+    )
+    course_stats = await get_student_course_attendance_stats(
+        db, student_id, now=generated_at
+    )
+
+    report_rows = (
+        await db.execute(
+            select(
+                Course.id.label("course_id"),
+                Course.course_code,
+                Course.course_name,
+                Section.id.label("section_id"),
+                Section.section_name,
+                User.full_name.label("instructor_name"),
+                AttendanceSession.id.label("session_id"),
+                AttendanceSession.title.label("session_title"),
+                AttendanceSession.start_time.label("session_date"),
+                AttendanceEvent.final_status.label("final_status"),
+            )
+            .select_from(Enrollment)
+            .join(Section, Section.id == Enrollment.section_id)
+            .join(Course, Course.id == Section.course_id)
+            .join(User, User.id == Section.instructor_id)
+            .outerjoin(
+                AttendanceSession,
+                and_(
+                    AttendanceSession.section_id == Section.id,
+                    ended_session_condition(generated_at),
+                ),
+            )
+            .outerjoin(
+                AttendanceEvent,
+                and_(
+                    AttendanceEvent.attendance_session_id == AttendanceSession.id,
+                    AttendanceEvent.student_id == student_id,
+                ),
+            )
+            .where(Enrollment.student_id == student_id)
+            .order_by(
+                Course.course_code.asc(),
+                Section.section_name.asc(),
+                AttendanceSession.start_time.asc(),
+            )
+        )
+    ).all()
+
+    courses_by_id: dict[UUID, dict] = {}
+    sections_by_course: dict[UUID, dict[UUID, str]] = {}
+    for row in report_rows:
+        course = courses_by_id.setdefault(
+            row.course_id,
+            {
+                "course_id": row.course_id,
+                "course_code": row.course_code,
+                "course_name": row.course_name,
+                "instructor_name": row.instructor_name,
+                "sessions": [],
+            },
+        )
+        sections_by_course.setdefault(row.course_id, {})[row.section_id] = (
+            row.section_name
+        )
+
+        if row.session_id is not None:
+            course["sessions"].append(
+                {
+                    "session_id": row.session_id,
+                    "title": row.session_title,
+                    "date": row.session_date,
+                    "status": (
+                        "Present"
+                        if row.final_status in ATTENDED_STATUSES
+                        else "Absent"
+                    ),
+                }
+            )
+
+    courses = []
+    for course_id, course in courses_by_id.items():
+        course_sections = sections_by_course[course_id]
+        section_ids = sorted(course_sections, key=lambda value: course_sections[value])
+        stats = course_stats.get(
+            course_id, {"attended": 0, "total": 0, "percentage": 0.0}
+        )
+        percentage = stats["percentage"]
+        if percentage >= 75:
+            standing = "Good standing"
+        elif percentage >= 50:
+            standing = "Needs attention"
+        else:
+            standing = "Critical risk"
+
+        course["sessions"].sort(key=lambda session: session["date"])
+        courses.append(
+            {
+                **course,
+                "section_id": section_ids[0],
+                "section_name": ", ".join(
+                    dict.fromkeys(course_sections[section_id] for section_id in section_ids)
+                ),
+                "attended": stats["attended"],
+                "absent": stats["total"] - stats["attended"],
+                "total_sessions": stats["total"],
+                "percentage": percentage,
+                "status": standing,
+            }
+        )
+    courses.sort(key=lambda course: course["course_code"])
+
+    totals = overall_stats[student_id]
+    return {
+        "student": {
+            "id": student.id,
+            "full_name": student.full_name,
+            "email": student.email,
+            "rfid_uid": student.rfid_uid,
+        },
+        "courses": courses,
+        "totals": {
+            "courses": len(courses),
+            "attended": totals["attended"],
+            "absent": totals["total"] - totals["attended"],
+            "total_sessions": totals["total"],
+            "percentage": totals["percentage"],
+        },
+        "generated_at": generated_at,
+    }
 
 
 @router.post(

@@ -16,11 +16,18 @@ Definitions:
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Models import AttendanceEvent, AttendanceSession, Device, Enrollment
+from Models import (
+    AttendanceEvent,
+    AttendanceSession,
+    Course,
+    Device,
+    Enrollment,
+    Section,
+)
 
 ATTENDED_STATUSES = ("Present", "Late")
 
@@ -128,6 +135,58 @@ async def get_student_attendance_stats(
             "attended": attended_count,
             "total": total,
             "percentage": compute_percentage(attended_count, total),
+        }
+    return stats
+
+
+async def get_student_course_attendance_stats(
+    db: AsyncSession,
+    student_id: UUID,
+    *,
+    now: datetime | None = None,
+) -> dict[UUID, dict]:
+    """Return ended-session attendance statistics grouped by enrolled course."""
+    attended_session_id = case(
+        (
+            AttendanceEvent.final_status.in_(ATTENDED_STATUSES),
+            AttendanceSession.id,
+        )
+    )
+    stmt = (
+        select(
+            Course.id.label("course_id"),
+            func.count(func.distinct(AttendanceSession.id)).label("total"),
+            func.count(func.distinct(attended_session_id)).label("attended"),
+        )
+        .select_from(Enrollment)
+        .join(Section, Section.id == Enrollment.section_id)
+        .join(Course, Course.id == Section.course_id)
+        .join(
+            AttendanceSession,
+            AttendanceSession.section_id == Section.id,
+        )
+        .outerjoin(
+            AttendanceEvent,
+            and_(
+                AttendanceEvent.attendance_session_id == AttendanceSession.id,
+                AttendanceEvent.student_id == student_id,
+            ),
+        )
+        .where(
+            Enrollment.student_id == student_id,
+            ended_session_condition(now),
+        )
+        .group_by(Course.id)
+    )
+
+    stats: dict[UUID, dict] = {}
+    for row in (await db.execute(stmt)).all():
+        total = int(row.total)
+        attended = int(row.attended)
+        stats[row.course_id] = {
+            "attended": attended,
+            "total": total,
+            "percentage": compute_percentage(attended, total),
         }
     return stats
 

@@ -18,6 +18,7 @@ import SessionPage from './pages/SessionPage'
 import SettingsPage from './pages/SettingsPage'
 import StudentsPage from './pages/StudentsPage'
 import AllStudentsPage from './pages/AllStudentsPage'
+import StudentReportPage from './pages/StudentReportPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/students/:id/report" element={<StudentReportPage />} />
           <Route path="/students" element={<AllStudentsPage />} />
           <Route path="/courses/:id/students" element={<StudentsPage />} />
           <Route path="/courses/:id" element={<CourseDashboardPage />} />

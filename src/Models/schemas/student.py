@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import Literal, Optional
 from uuid import UUID
 
 from pydantic import EmailStr, Field
@@ -40,3 +41,46 @@ class StudentFaceRegistrationResponse(ORMModel):
     file_path: str
     has_encoding: bool
 
+
+class StudentReportIdentity(ORMModel):
+    id: UUID
+    full_name: str
+    email: EmailStr
+    rfid_uid: str
+
+
+class StudentReportSessionResponse(ORMModel):
+    session_id: UUID
+    title: str
+    date: datetime
+    status: Literal["Present", "Absent"]
+
+
+class StudentReportCourseResponse(ORMModel):
+    course_id: UUID
+    course_code: str
+    course_name: str
+    section_id: UUID
+    section_name: str
+    instructor_name: str
+    attended: int
+    absent: int
+    total_sessions: int
+    percentage: float
+    status: Literal["Good standing", "Needs attention", "Critical risk"]
+    sessions: list[StudentReportSessionResponse]
+
+
+class StudentReportTotals(ORMModel):
+    courses: int
+    attended: int
+    absent: int
+    total_sessions: int
+    percentage: float
+
+
+class StudentReportResponse(ORMModel):
+    student: StudentReportIdentity
+    courses: list[StudentReportCourseResponse]
+    totals: StudentReportTotals
+    generated_at: datetime

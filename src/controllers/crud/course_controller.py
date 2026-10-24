@@ -101,6 +101,8 @@ class CourseController(CRUDBaseController[Course]):
                 "rfid_uid": student.rfid_uid,
                 "face_reference_image": student.face_reference_image,
                 "attendance_percentage": stats[student.id]["percentage"],
+                "present_count": stats[student.id]["attended"],
+                "total_sessions": stats[student.id]["total"],
             }
             for student in students
         ]

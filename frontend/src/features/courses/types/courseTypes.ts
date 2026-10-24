@@ -16,6 +16,8 @@ export interface CourseStudentAttendanceResponse {
   rfid_uid: string
   face_reference_image: string | null
   attendance_percentage: number
+  present_count: number
+  total_sessions: number
 }
 
 export interface AttendanceSummary {

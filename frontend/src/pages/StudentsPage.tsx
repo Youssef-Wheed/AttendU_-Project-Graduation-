@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import Button from '../components/ui/Button'
 import PageHeader from '../components/ui/PageHeader'
@@ -458,7 +458,14 @@ export default function StudentsPage() {
                                 {getStudentInitials(student.full_name)}
                               </div>
                               <div className="students-page__student-copy">
-                                <strong>{student.full_name}</strong>
+                                <strong>
+                                  <Link
+                                    to={`/students/${student.id}/report`}
+                                    onClick={(event) => event.stopPropagation()}
+                                  >
+                                    {student.full_name}
+                                  </Link>
+                                </strong>
                                 <span className="students-page__rfid">RFID {student.rfid_uid}</span>
                               </div>
                             </div>
@@ -467,6 +474,9 @@ export default function StudentsPage() {
                           <td>
                             <div className="students-page__attendance-cell">
                               <strong>{formatAttendance(student.attendance_percentage)}</strong>
+                              <span className="students-page__attendance-count">
+                                {student.present_count} / {student.total_sessions} sessions
+                              </span>
                               <span className={`ui-badge students-page__standing students-page__standing--${tone}`}>
                                 {getStandingLabel(student.attendance_percentage)}
                               </span>
