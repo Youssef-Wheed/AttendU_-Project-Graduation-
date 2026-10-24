@@ -28,6 +28,10 @@ export interface AttendanceSessionResponse {
   end_time: string
   is_active: boolean
   verification_method: SessionVerificationMethod
+  section_name?: string
+  course_id?: string
+  course_name?: string
+  course_code?: string
   total_students?: number
 }
 
@@ -35,12 +39,12 @@ export interface AttendanceSessionHistoryQuery {
   start_date?: string
   end_date?: string
   course_code?: string
+  offset?: number
+  limit?: number
 }
 
 export interface AttendanceSessionHistoryResponse extends AttendanceSessionResponse {
-  section_name?: string
   section?: string
-  course_code?: string
   present_count?: number
   present?: number
   attendance_percentage?: number

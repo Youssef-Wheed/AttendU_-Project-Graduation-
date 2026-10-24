@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 
-import { createSession, getActiveSessions, stopSession, preloadSessionFaces } from '../api/attendanceSessionApi'
+import { createSession, getActiveSessions, preloadSessionFaces } from '../api/attendanceSessionApi'
 import type {
   AttendanceSessionCreate,
   AttendanceSessionResponse,
@@ -11,9 +11,10 @@ import './SessionControls.css'
 
 export interface SessionControlsProps {
   sectionId: string
+  activeSession: AttendanceSessionResponse | null
+  onSessionChange?: (session: AttendanceSessionResponse | null) => void
   title?: string
   description?: string
-  onSessionChange?: (session: AttendanceSessionResponse | null) => void
 }
 
 const DURATION_PRESETS = [
@@ -24,14 +25,6 @@ const DURATION_PRESETS = [
   { label: '2 h',    value: 120 },
 ]
 
-const formatCountdown = (milliseconds: number): string => {
-  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000))
-  const hours   = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  return [hours, minutes, seconds].map((u) => String(u).padStart(2, '0')).join(':')
-}
-
 const formatDuration = (minutes: number): string => {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
@@ -40,11 +33,18 @@ const formatDuration = (minutes: number): string => {
   return `${h}h ${m}m`
 }
 
+const formatClock = (value: string): string => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '--'
+  return new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(date)
+}
+
 export function SessionControls({
   sectionId,
-  title = 'Session Control',
-  description = 'Open a live attendance window for this section.',
+  activeSession,
   onSessionChange,
+  title = 'Session details',
+  description = 'Name the session, choose a duration, and pick how students verify.',
 }: SessionControlsProps) {
   const currentUser = authStore.getUser()
 
@@ -54,13 +54,11 @@ export function SessionControls({
   const [isCustom, setIsCustom]               = useState(false)
   const [verificationMethod, setVerificationMethod] = useState<SessionVerificationMethod>('RFID')
 
-  const [activeSession, setActiveSession]     = useState<AttendanceSessionResponse | null>(null)
   const [isLoading, setIsLoading]             = useState(true)
   const [isSubmitting, setIsSubmitting]       = useState(false)
   const [error, setError]                     = useState<string | null>(null)
-  const [now, setNow]                         = useState(() => Date.now())
 
-  /* ── Load active session on mount ── */
+  /* ── Load active session on mount / section change ── */
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -70,7 +68,6 @@ export function SessionControls({
         const sessions = await getActiveSessions()
         const match = sessions.find((s) => s.section_id === sectionId) ?? null
         if (!cancelled) {
-          setActiveSession(match)
           onSessionChange?.(match)
         }
       } catch (err) {
@@ -82,27 +79,6 @@ export function SessionControls({
     void load()
     return () => { cancelled = true }
   }, [onSessionChange, sectionId])
-
-  /* ── Tick while session is active ── */
-  useEffect(() => {
-    if (!activeSession) return
-    const id = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(id)
-  }, [activeSession])
-
-  const countdown = useMemo(() => {
-    if (!activeSession) return null
-    return formatCountdown(new Date(activeSession.end_time).getTime() - now)
-  }, [activeSession, now])
-
-  /* Progress 0→1 for the ring */
-  const countdownProgress = useMemo(() => {
-    if (!activeSession) return 0
-    const total = new Date(activeSession.end_time).getTime() - new Date(activeSession.start_time).getTime()
-    const remaining = new Date(activeSession.end_time).getTime() - now
-    if (total <= 0) return 0
-    return Math.max(0, Math.min(1, remaining / total))
-  }, [activeSession, now])
 
   /* Effective duration (minutes) */
   const effectiveDuration = useMemo(() => {
@@ -139,7 +115,7 @@ export function SessionControls({
     setError(null)
     try {
       const created = await createSession(payload)
-      
+
       // If RFID_FACE, preload face encodings
       if (verificationMethod === 'RFID_FACE') {
         try {
@@ -150,8 +126,6 @@ export function SessionControls({
         }
       }
 
-      setActiveSession(created)
-      setNow(Date.now())
       setSessionTitle('')
       onSessionChange?.(created)
     } catch (err) {
@@ -160,25 +134,6 @@ export function SessionControls({
       setIsSubmitting(false)
     }
   }
-
-  const handleStopSession = async () => {
-    if (!activeSession) return
-    setIsSubmitting(true)
-    setError(null)
-    try {
-      await stopSession(activeSession.id)
-      setActiveSession(null)
-      onSessionChange?.(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to stop session.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  /* ── SVG ring dimensions ── */
-  const RADIUS = 42
-  const CIRC   = 2 * Math.PI * RADIUS
 
   return (
     <section className="session-controls" aria-live="polite">
@@ -191,13 +146,26 @@ export function SessionControls({
         </div>
         <span className={`session-controls-status ${activeSession ? 'active' : 'idle'}`}>
           {activeSession && <span className="session-controls-status-dot" aria-hidden="true" />}
-          {activeSession ? 'Active' : 'Idle'}
+          {activeSession ? 'Live' : 'Ready'}
         </span>
       </div>
 
       {/* Error / loading feedback */}
       {error    && <p className="session-controls-feedback error">{error}</p>}
       {isLoading && <p className="session-controls-feedback info">Checking session status…</p>}
+
+      {/* ── Live note (details live in the right panel) ── */}
+      {!isLoading && activeSession && (
+        <div className="sc-live-note">
+          <span className="sc-live-note__dot" aria-hidden="true" />
+          <div>
+            <p className="sc-live-note__title">{activeSession.title}</p>
+            <p className="sc-live-note__meta">
+              Session is live · ends at {formatClock(activeSession.end_time)}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Create form ── */}
       {!isLoading && !activeSession && (
@@ -272,7 +240,7 @@ export function SessionControls({
 
           {/* Verification Method */}
           <div className="sc-field">
-            <label htmlFor={`sc-method-${sectionId}`}>Verification Method</label>
+            <label htmlFor={`sc-method-${sectionId}`}>Verification method</label>
             <select
               id={`sc-method-${sectionId}`}
               className="sc-input sc-select"
@@ -284,7 +252,7 @@ export function SessionControls({
               <option value="MANUAL">Manual Attendance Only</option>
             </select>
             {verificationMethod === 'RFID_FACE' && (
-              <p className="sc-duration-preview" style={{ color: 'var(--primary)', marginTop: '8px' }}>
+              <p className="sc-duration-preview sc-duration-preview--accent">
                 Face encodings will be pre-loaded when the session starts.
               </p>
             )}
@@ -298,75 +266,6 @@ export function SessionControls({
             {isSubmitting ? 'Starting…' : 'Start Session'}
           </button>
         </form>
-      )}
-
-      {/* ── Active session card ── */}
-      {!isLoading && activeSession && (
-        <div className="session-controls-active-card">
-
-          {/* Countdown ring */}
-          <div className="sc-ring-wrap" aria-label={`Time remaining: ${countdown}`}>
-            <svg className="sc-ring" viewBox="0 0 100 100" aria-hidden="true">
-              {/* Track */}
-              <circle
-                cx="50" cy="50" r={RADIUS}
-                fill="none"
-                stroke="currentColor"
-                className="sc-ring-track"
-                strokeWidth="8"
-              />
-              {/* Progress arc */}
-              <circle
-                cx="50" cy="50" r={RADIUS}
-                fill="none"
-                className="sc-ring-progress"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={CIRC}
-                strokeDashoffset={CIRC * (1 - countdownProgress)}
-                transform="rotate(-90 50 50)"
-              />
-            </svg>
-            <div className="sc-ring-inner">
-              <span className="sc-ring-label">remaining</span>
-              <span className="sc-ring-time">{countdown}</span>
-              <span className="sc-ring-dur">{formatDuration(
-                Math.round(
-                  (new Date(activeSession.end_time).getTime() -
-                   new Date(activeSession.start_time).getTime()) / 60_000
-                )
-              )}</span>
-            </div>
-          </div>
-
-          {/* Session info */}
-          <div className="sc-active-info">
-            <p className="sc-active-name">{activeSession.title}</p>
-            <p className="sc-active-hint">
-              Method: <strong>{activeSession.verification_method.replace('_', ' ')}</strong>
-            </p>
-            <p className="sc-active-hint">
-              Started{' '}
-              {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
-                new Date(activeSession.start_time),
-              )}
-              {' · '}
-              Ends{' '}
-              {new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
-                new Date(activeSession.end_time),
-              )}
-            </p>
-          </div>
-
-          <button
-            className="session-controls-button stop"
-            type="button"
-            onClick={handleStopSession}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Stopping…' : 'Stop Session'}
-          </button>
-        </div>
       )}
     </section>
   )

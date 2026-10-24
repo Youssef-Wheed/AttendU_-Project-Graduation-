@@ -14,7 +14,11 @@ import {
 import MetricCard from '../components/ui/MetricCard'
 import PageHeader from '../components/ui/PageHeader'
 import Button from '../components/ui/Button'
-import { getCourseDashboard, type CourseDashboardResponse } from '../features/courses/api/courseApi'
+import {
+  getCourse,
+  getCourseDashboard,
+  type CourseDashboardResponse,
+} from '../features/courses/api/courseApi'
 import { useTopbarSetter } from '../context/TopbarContext'
 import { useTheme } from '../context/ThemeContext'
 import './CourseDashboardPage.css'
@@ -54,6 +58,7 @@ export default function CourseDashboardPage() {
   const [data, setData] = useState<CourseDashboardResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [courseLabel, setCourseLabel] = useState<string | null>(null)
   const isMissingCourseId = !id
   const setTopbar = useTopbarSetter()
   const { theme } = useTheme()
@@ -67,11 +72,36 @@ export default function CourseDashboardPage() {
   }
 
   useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    let isActive = true
+
+    const loadCourse = async () => {
+      try {
+        const course = await getCourse(id)
+        if (isActive) {
+          setCourseLabel(`${course.course_name} · ${course.course_code}`)
+        }
+      } catch {
+        if (isActive) setCourseLabel(null)
+      }
+    }
+
+    void loadCourse()
+
+    return () => {
+      isActive = false
+    }
+  }, [id])
+
+  useEffect(() => {
     setTopbar({
       kicker: 'Analytics',
       title: 'Course analytics',
       description: id
-        ? `Attendance trend reporting for course ${id.slice(0, 8)}.`
+        ? `Attendance trend reporting for ${courseLabel ?? 'this course'}.`
         : 'Attendance trend reporting for the selected course.',
       actions: (
         <>
@@ -86,7 +116,7 @@ export default function CourseDashboardPage() {
         </>
       ),
     })
-  }, [setTopbar, id, navigate])
+  }, [setTopbar, id, navigate, courseLabel])
 
   useEffect(() => {
     if (!id) {
@@ -128,7 +158,7 @@ export default function CourseDashboardPage() {
     <section className="ui-surface ui-section course-dashboard-overview">
       <PageHeader
         eyebrow="Performance"
-        title="Attendance snapshot"
+        title={courseLabel ?? 'Attendance snapshot'}
         description="Track attendance counts and compare weekly and monthly performance without switching layouts or context."
       />
 
