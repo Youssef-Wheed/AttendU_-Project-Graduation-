@@ -1,22 +1,114 @@
 .course-dashboard-overview {
   display: grid;
   gap: var(--space-6);
+  min-width: 0;
   animation: fade-up 0.4s var(--ease-out-circ) both;
 }
 
-.course-dashboard-chart-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.course-dashboard-overview > * {
+  min-width: 0;
+}
+
+.course-dashboard-kpis {
   gap: var(--space-5);
+}
+
+.course-dashboard-chart-card {
+  padding: var(--space-6);
 }
 
 .course-dashboard-chart-frame {
   margin-top: var(--space-5);
-  min-height: 260px;
+  min-height: 360px;
 }
 
 .course-dashboard-chart-empty {
   margin-top: var(--space-5);
+  min-height: 260px;
+  align-content: center;
+}
+
+.course-dashboard-chart-empty__period {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text) !important;
+  font-weight: 600;
+}
+
+/* ─── Weekly / Monthly toggle ─────────────────────────────── */
+.course-dashboard-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+}
+
+.course-dashboard-toggle__option {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.course-dashboard-toggle__option:hover {
+  color: var(--color-text);
+}
+
+.course-dashboard-toggle__option--active {
+  color: var(--color-on-soft-primary);
+  background: var(--color-primary-soft);
+  box-shadow: inset 0 0 0 1px rgba(124, 143, 255, 0.28);
+}
+
+.course-dashboard-toggle__option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────── */
+.course-dashboard-tooltip {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 10.5rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-2);
+}
+
+.course-dashboard-tooltip__title {
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.course-dashboard-tooltip__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.course-dashboard-tooltip__row strong {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.course-dashboard-tooltip__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
 }
 
 /* Recharts renders legend/axis labels as SVG <Text> — style them with tokens */
@@ -29,11 +121,20 @@
   outline: none;
 }
 
+/* ─── Light theme ─────────────────────────────────────────── */
+html[data-theme="light"] .course-dashboard-toggle {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+html[data-theme="light"] .course-dashboard-toggle__option--active {
+  background: var(--color-primary-soft);
+}
+
 /* ─── Responsive ──────────────────────────────────────────── */
 
 @media (max-width: 1024px) {
-  .course-dashboard-chart-grid {
-    grid-template-columns: 1fr;
+  .course-dashboard-chart-card {
+    padding: var(--space-5);
   }
 }
 
@@ -42,8 +143,16 @@
     gap: var(--space-4);
   }
 
+  .course-dashboard-chart-card {
+    padding: var(--space-4);
+  }
+
   .course-dashboard-chart-frame {
-    min-height: 200px;
+    min-height: 260px;
     margin-top: var(--space-4);
+  }
+
+  .course-dashboard-chart-empty {
+    min-height: 220px;
   }
 }

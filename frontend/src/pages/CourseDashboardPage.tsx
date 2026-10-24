@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  Bar,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -19,9 +20,12 @@ import {
   getCourseDashboard,
   type CourseDashboardResponse,
 } from '../features/courses/api/courseApi'
+import type { AttendanceSummary } from '../features/courses/types/courseTypes'
 import { useTopbarSetter } from '../context/TopbarContext'
 import { useTheme } from '../context/ThemeContext'
 import './CourseDashboardPage.css'
+
+type SummaryRange = 'weekly' | 'monthly'
 
 const IconUsers = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
@@ -59,6 +63,7 @@ export default function CourseDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [courseLabel, setCourseLabel] = useState<string | null>(null)
+  const [range, setRange] = useState<SummaryRange>('weekly')
   const isMissingCourseId = !id
   const setTopbar = useTopbarSetter()
   const { theme } = useTheme()
@@ -69,6 +74,8 @@ export default function CourseDashboardPage() {
     text: isDarkTheme ? '#e7ecf7' : '#0f172a',
     present: isDarkTheme ? '#34d399' : '#15803d',
     absent: isDarkTheme ? '#fb7185' : '#dc2626',
+    percentage: isDarkTheme ? '#7c8fff' : '#3b5bdb',
+    cursor: isDarkTheme ? 'rgba(124, 143, 255, 0.08)' : 'rgba(59, 91, 219, 0.06)',
   }
 
   useEffect(() => {
@@ -154,6 +161,14 @@ export default function CourseDashboardPage() {
     }
   }, [id])
 
+  const summaries: AttendanceSummary[] = data
+    ? range === 'weekly'
+      ? data.weekly_summaries
+      : data.monthly_summaries
+    : []
+  const hasTrend = summaries.length >= 2
+  const singlePeriod = summaries.length === 1 ? summaries[0] : null
+
   return (
     <section className="ui-surface ui-section course-dashboard-overview">
       <PageHeader
@@ -194,102 +209,165 @@ export default function CourseDashboardPage() {
 
       {!isMissingCourseId && !isLoading && !error && data ? (
         <>
-          <div className="ui-stat-grid">
+          <div className="ui-stat-grid course-dashboard-kpis">
             <MetricCard label="Total students" value={data.total_students} icon={<IconUsers />} />
             <MetricCard label="Present count" value={data.present_count} icon={<IconCheckCircle />} />
             <MetricCard label="Absent count" value={data.absent_count} icon={<IconXCircle />} />
             <MetricCard label="Attendance rate" value={`${data.attendance_percentage}%`} icon={<IconPercent />} />
           </div>
 
-          <div className="course-dashboard-chart-grid">
-            <section className="ui-surface ui-section">
-              <PageHeader
-                eyebrow="Trend"
-                title="Weekly summaries"
-                description="Compare weekly present and absent counts across recent attendance windows."
-              />
-              <div className="course-dashboard-chart-frame">
-                {data.weekly_summaries.length === 0 ? (
-                  <section className="ui-empty course-dashboard-chart-empty">
-                    <h3>No weekly data yet</h3>
-                    <p>Start attendance sessions to populate this weekly trend chart.</p>
-                  </section>
-                ) : (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={data.weekly_summaries}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                      <XAxis
-                        dataKey="period_start"
-                        tickFormatter={formatSummaryPeriod}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: chartColors.tick, fontSize: 12 }}
-                      />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.tick, fontSize: 12 }} />
-                      <Tooltip
-                        labelFormatter={(label) => formatSummaryPeriod(String(label))}
-                        labelStyle={{ color: chartColors.text }}
-                        itemStyle={{ color: chartColors.text }}
-                        contentStyle={{
-                          backgroundColor: 'var(--color-surface)',
-                          borderRadius: '16px',
-                          border: '1px solid var(--color-border-strong)',
-                          boxShadow: 'var(--shadow-2)',
-                        }}
-                      />
-                      <Legend verticalAlign="top" height={36} />
-                      <Line type="monotone" dataKey="present_count" stroke={chartColors.present} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
-                      <Line type="monotone" dataKey="absent_count" stroke={chartColors.absent} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </section>
+          <section className="ui-surface ui-section course-dashboard-chart-card">
+            <PageHeader
+              eyebrow="Trend"
+              title="Attendance trend"
+              description={
+                range === 'weekly'
+                  ? 'Present and absent counts per week, with the attendance rate overlaid.'
+                  : 'Present and absent counts per month, with the attendance rate overlaid.'
+              }
+              actions={(
+                <div className="course-dashboard-toggle" role="group" aria-label="Chart period">
+                  <button
+                    type="button"
+                    className={`course-dashboard-toggle__option${range === 'weekly' ? ' course-dashboard-toggle__option--active' : ''}`}
+                    aria-pressed={range === 'weekly'}
+                    onClick={() => setRange('weekly')}
+                  >
+                    Weekly
+                  </button>
+                  <button
+                    type="button"
+                    className={`course-dashboard-toggle__option${range === 'monthly' ? ' course-dashboard-toggle__option--active' : ''}`}
+                    aria-pressed={range === 'monthly'}
+                    onClick={() => setRange('monthly')}
+                  >
+                    Monthly
+                  </button>
+                </div>
+              )}
+            />
 
-            <section className="ui-surface ui-section">
-              <PageHeader
-                eyebrow="Trend"
-                title="Monthly summaries"
-                description="Use the monthly rollup to spot broader attendance changes over time."
-              />
-              <div className="course-dashboard-chart-frame">
-                {data.monthly_summaries.length === 0 ? (
-                  <section className="ui-empty course-dashboard-chart-empty">
-                    <h3>No monthly data yet</h3>
-                    <p>Start attendance sessions to populate this monthly trend chart.</p>
-                  </section>
-                ) : (
-                  <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={data.monthly_summaries}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                      <XAxis
-                        dataKey="period_start"
-                        tickFormatter={formatSummaryPeriod}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: chartColors.tick, fontSize: 12 }}
-                      />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.tick, fontSize: 12 }} />
-                      <Tooltip
-                        labelFormatter={(label) => formatSummaryPeriod(String(label))}
-                        labelStyle={{ color: chartColors.text }}
-                        itemStyle={{ color: chartColors.text }}
-                        contentStyle={{
-                          backgroundColor: 'var(--color-surface)',
-                          borderRadius: '16px',
-                          border: '1px solid var(--color-border-strong)',
-                          boxShadow: 'var(--shadow-2)',
-                        }}
-                      />
-                      <Legend verticalAlign="top" height={36} />
-                      <Line type="monotone" dataKey="present_count" stroke={chartColors.present} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Present" />
-                      <Line type="monotone" dataKey="absent_count" stroke={chartColors.absent} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Absent" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </section>
-          </div>
+            <div className="course-dashboard-chart-frame">
+              {!hasTrend ? (
+                <section className="ui-empty course-dashboard-chart-empty">
+                  <h3>
+                    {summaries.length === 0
+                      ? `No ${range} data yet`
+                      : `Not enough ${range === 'weekly' ? 'weekly' : 'monthly'} data for a trend`}
+                  </h3>
+                  <p>
+                    {summaries.length === 0
+                      ? 'Start attendance sessions to populate this attendance trend chart.'
+                      : 'At least two periods are needed to compare present, absent, and attendance rate over time.'}
+                  </p>
+                  {singlePeriod ? (
+                    <p className="course-dashboard-chart-empty__period">
+                      {formatSummaryPeriod(singlePeriod.period_start)} · {singlePeriod.present_count} present ·{' '}
+                      {singlePeriod.absent_count} absent · {singlePeriod.attendance_percentage.toFixed(1)}%
+                    </p>
+                  ) : null}
+                </section>
+              ) : (
+                <ResponsiveContainer width="100%" height={360}>
+                  <ComposedChart data={summaries} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                    <XAxis
+                      dataKey="period_start"
+                      tickFormatter={formatSummaryPeriod}
+                      axisLine={false}
+                      tickLine={false}
+                      minTickGap={16}
+                      tick={{ fill: chartColors.tick, fontSize: 12 }}
+                    />
+                    <YAxis
+                      yAxisId="count"
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                      width={44}
+                      tick={{ fill: chartColors.tick, fontSize: 12 }}
+                    />
+                    <YAxis
+                      yAxisId="percentage"
+                      orientation="right"
+                      domain={[0, 100]}
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                      width={52}
+                      tickFormatter={(value) => `${Math.round(Number(value))}%`}
+                      tick={{ fill: chartColors.tick, fontSize: 12 }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: chartColors.cursor }}
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload || payload.length === 0) {
+                          return null
+                        }
+
+                        const point = payload[0]?.payload as AttendanceSummary | undefined
+
+                        if (!point) {
+                          return null
+                        }
+
+                        return (
+                          <div className="course-dashboard-tooltip">
+                            <p className="course-dashboard-tooltip__title">
+                              {formatSummaryPeriod(String(label))}
+                            </p>
+                            <p className="course-dashboard-tooltip__row">
+                              <span className="course-dashboard-tooltip__dot" style={{ background: chartColors.present }} />
+                              <span>Present</span>
+                              <strong>{point.present_count}</strong>
+                            </p>
+                            <p className="course-dashboard-tooltip__row">
+                              <span className="course-dashboard-tooltip__dot" style={{ background: chartColors.absent }} />
+                              <span>Absent</span>
+                              <strong>{point.absent_count}</strong>
+                            </p>
+                            <p className="course-dashboard-tooltip__row">
+                              <span className="course-dashboard-tooltip__dot" style={{ background: chartColors.percentage }} />
+                              <span>Attendance</span>
+                              <strong>{point.attendance_percentage.toFixed(1)}%</strong>
+                            </p>
+                          </div>
+                        )
+                      }}
+                    />
+                    <Legend verticalAlign="top" height={36} iconType="circle" />
+                    <Bar
+                      yAxisId="count"
+                      dataKey="present_count"
+                      name="Present"
+                      stackId="attendance"
+                      fill={chartColors.present}
+                      maxBarSize={56}
+                    />
+                    <Bar
+                      yAxisId="count"
+                      dataKey="absent_count"
+                      name="Absent"
+                      stackId="attendance"
+                      fill={chartColors.absent}
+                      maxBarSize={56}
+                      radius={[6, 6, 0, 0]}
+                    />
+                    <Line
+                      yAxisId="percentage"
+                      type="monotone"
+                      dataKey="attendance_percentage"
+                      name="Attendance %"
+                      stroke={chartColors.percentage}
+                      strokeWidth={3}
+                      dot={{ r: 3.5, fill: chartColors.percentage, strokeWidth: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </section>
         </>
       ) : null}
     </section>
