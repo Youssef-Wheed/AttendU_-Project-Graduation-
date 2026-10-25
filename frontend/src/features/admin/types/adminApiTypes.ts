@@ -65,6 +65,34 @@ export interface UserApiResponse extends TimestampedEntity {
   role: string
 }
 
+export interface UserAdminListResponse extends UserApiResponse {
+  sections_count: number
+}
+
+export interface TeachingSectionApiResponse {
+  section_id: string
+  section_name: string
+  schedule_time: string
+  course_id: string
+  course_code: string
+  course_name: string
+  students_count: number
+  sessions_count: number
+  last_session_at: string | null
+}
+
+export interface UserTeachingApiResponse {
+  id: string
+  full_name: string
+  email: string
+  role: string
+  sections: TeachingSectionApiResponse[]
+  sections_count: number
+  unique_students: number
+  total_enrollments: number
+  sessions_count: number
+}
+
 export interface UserApiCreatePayload {
   full_name: string
   email: string

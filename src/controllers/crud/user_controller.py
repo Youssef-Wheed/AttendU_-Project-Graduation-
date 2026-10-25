@@ -1,10 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from uuid import UUID
 
-from fastapi import HTTPException, status
-
-from Models import User, Section
+from Models import User
 from controllers.base_controller import CRUDBaseController
 from helpers.auth import get_password_hash
 
@@ -26,16 +23,6 @@ class UserController(CRUDBaseController[User]):
     async def delete_user(self, db: AsyncSession, user_id: UUID) -> None:
         user = await self.get_by_id(db, user_id)
         if user:
-            # Prevent deleting a user who is assigned as instructor to any section
-            stmt = select(Section).where(Section.instructor_id == user.id).limit(1)
-            res = await db.execute(stmt)
-            section_exists = res.scalar_one_or_none()
-            if section_exists:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot delete user: assigned as instructor to one or more sections. Reassign or remove sections first.",
-                )
-
             await self.delete(db, user)
 
 

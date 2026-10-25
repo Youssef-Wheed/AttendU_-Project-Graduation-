@@ -1,5 +1,14 @@
 export type PresenceMethod = 'RFID' | 'FACE' | 'MANUAL'
 
+export interface UserAdminRow {
+  id: string
+  fullName: string
+  email: string
+  role: string
+  sectionsCount: number
+  createdAt: string
+}
+
 export interface StudentAdminRow {
   id: string
   fullName: string

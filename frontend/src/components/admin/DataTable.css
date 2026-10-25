@@ -87,6 +87,13 @@
   box-shadow: 0 4px 12px rgba(124, 143, 255, 0.3);
 }
 
+.admin-table-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+  box-shadow: none;
+}
+
 .admin-table-actions button:active {
   transform: scale(0.97);
   transition-duration: 80ms;

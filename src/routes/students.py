@@ -59,6 +59,17 @@ async def create_student(
             entity_label=student.full_name,
             source="api",
         )
+        for section_id in payload.section_ids:
+            await log_action(
+                db,
+                actor_user_id=current_user.id,
+                action="enrollment.added",
+                entity_type="enrollment",
+                entity_id=student.id,
+                entity_label=f"{student.full_name} in section {section_id}",
+                changes={"section_id": {"new": str(section_id)}},
+                source="api",
+            )
         return student
     except IntegrityError as exc:
         await db.rollback()
@@ -348,6 +359,7 @@ async def update_student(
     try:
         updates = payload.model_dump(exclude_unset=True)
         changes = build_changes(student, updates)
+        previous_section_ids = set(student.section_ids)
         updated_student = await student_controller.update_student(db, student, payload)
         if changes:
             await log_action(
@@ -360,6 +372,30 @@ async def update_student(
                 changes=changes,
                 source="api",
             )
+        if payload.section_ids is not None:
+            next_section_ids = set(updated_student.section_ids)
+            for section_id in next_section_ids - previous_section_ids:
+                await log_action(
+                    db,
+                    actor_user_id=current_user.id,
+                    action="enrollment.added",
+                    entity_type="enrollment",
+                    entity_id=updated_student.id,
+                    entity_label=f"{updated_student.full_name} in section {section_id}",
+                    changes={"section_id": {"new": str(section_id)}},
+                    source="api",
+                )
+            for section_id in previous_section_ids - next_section_ids:
+                await log_action(
+                    db,
+                    actor_user_id=current_user.id,
+                    action="enrollment.removed",
+                    entity_type="enrollment",
+                    entity_id=updated_student.id,
+                    entity_label=f"{updated_student.full_name} from section {section_id}",
+                    changes={"section_id": {"old": str(section_id)}},
+                    source="api",
+                )
         return updated_student
     except IntegrityError as exc:
         await db.rollback()
@@ -381,6 +417,7 @@ async def delete_student(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="student not found"
         )
+    section_ids = list(student.section_ids)
     await student_controller.delete(db, student)
     await log_action(
         db,
@@ -391,3 +428,14 @@ async def delete_student(
         entity_label=student.full_name,
         source="api",
     )
+    for section_id in section_ids:
+        await log_action(
+            db,
+            actor_user_id=current_user.id,
+            action="enrollment.removed",
+            entity_type="enrollment",
+            entity_id=student.id,
+            entity_label=f"{student.full_name} from section {section_id}",
+            changes={"section_id": {"old": str(section_id)}},
+            source="api",
+        )

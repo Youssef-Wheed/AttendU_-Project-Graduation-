@@ -7,22 +7,20 @@ import ConfirmDeleteModal from '../../components/admin/ConfirmDeleteModal'
 import DataTable, { type DataTableColumn } from '../../components/admin/DataTable'
 import TableToolbar from '../../components/admin/TableToolbar'
 import FeedbackBanner from '../../components/ui/FeedbackBanner'
+import TeachingDrawer from '../../features/admin/components/TeachingDrawer'
 import {
   createUserAdmin,
   deleteUserAdmin,
   listUsersAdmin,
 } from '../../features/admin/api/usersAdminApi'
-import type { UserApiCreatePayload } from '../../features/admin/types/adminApiTypes'
+import type {
+  UserAdminListResponse,
+  UserApiCreatePayload,
+} from '../../features/admin/types/adminApiTypes'
+import type { UserAdminRow } from '../../features/admin/types/adminContracts'
 import { useSnackbar } from '../../hooks/useSnackbar'
+import { authStore } from '../../store/authStore'
 import './AdminPages.css'
-
-interface UserAdminRow {
-  id: string
-  fullName: string
-  email: string
-  role: string
-  createdAt: string
-}
 
 const initialUserForm: UserApiCreatePayload = {
   full_name: '',
@@ -33,6 +31,7 @@ const initialUserForm: UserApiCreatePayload = {
 
 export default function UsersAdminPage() {
   const [rows, setRows] = useState<UserAdminRow[]>([])
+  const [users, setUsers] = useState<UserAdminListResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [feedbackError, setFeedbackError] = useState<string | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -43,21 +42,25 @@ export default function UsersAdminPage() {
   const [selectedUser, setSelectedUser] = useState<UserAdminRow | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
+  const [selectedTeachingUser, setSelectedTeachingUser] = useState<UserAdminRow | null>(null)
 
   const { setTopBarConfig, resetTopBarConfig } = useOutletContext<AdminShellOutletContext>()
   const { showSnackbar } = useSnackbar()
+  const currentUserId = String(authStore.getUser()?.id ?? '')
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true)
     setFeedbackError(null)
 
     try {
-      const users = await listUsersAdmin()
-      setRows(users.map(user => ({
+      const loadedUsers = await listUsersAdmin()
+      setUsers(loadedUsers)
+      setRows(loadedUsers.map(user => ({
         id: user.id,
         fullName: user.full_name,
         email: user.email,
         role: user.role,
+        sectionsCount: user.sections_count,
         createdAt: new Date(user.created_at).toLocaleDateString(),
       })))
     } catch (error) {
@@ -92,6 +95,24 @@ export default function UsersAdminPage() {
     () => [
       { id: 'fullName', header: 'Name', cell: (row) => row.fullName },
       { id: 'email', header: 'Email', cell: (row) => row.email },
+      {
+        id: 'sectionsCount',
+        header: 'Sections',
+        align: 'center',
+        cell: (row) => (
+          <button
+            type="button"
+            className="admin-user-sections-count"
+            onClick={(event) => {
+              event.stopPropagation()
+              setSelectedTeachingUser(row)
+            }}
+            aria-label={`View teaching for ${row.fullName}`}
+          >
+            {row.sectionsCount}
+          </button>
+        ),
+      },
       { 
         id: 'role', 
         header: 'Role', 
@@ -107,9 +128,15 @@ export default function UsersAdminPage() {
   )
 
   const handleDelete = useCallback((row: UserAdminRow) => {
+    if (row.id === currentUserId) return
     setSelectedUser(row)
     setIsDeleteOpen(true)
-  }, [])
+  }, [currentUserId])
+
+  const canDeleteUser = useCallback(
+    (row: UserAdminRow) => row.id !== currentUserId,
+    [currentUserId],
+  )
 
   const handleFormSubmit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -176,6 +203,7 @@ export default function UsersAdminPage() {
         isLoading={isLoading}
         getRowId={(row) => row.id}
         onDeleteRow={handleDelete}
+        canDeleteRow={canDeleteUser}
         emptyState={
           <FeedbackBanner
             variant="empty"
@@ -183,6 +211,13 @@ export default function UsersAdminPage() {
             description="Manage system access for instructors and admins."
           />
         }
+      />
+
+      <TeachingDrawer
+        user={selectedTeachingUser}
+        users={users}
+        onClose={() => setSelectedTeachingUser(null)}
+        onReassigned={loadUsers}
       />
 
       <AdminFormModal

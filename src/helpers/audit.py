@@ -44,26 +44,28 @@ async def log_action(
     changes: dict[str, Any] | None = None,
     source: Literal["device", "api", "system"],
 ) -> None:
-    event_type = (
-        "session_opened" if action == "attendance_session.started" else "session_closed"
-    )
-    metadata_json = {
-        "action": action,
-        "entity_type": entity_type,
-        "entity_id": str(entity_id),
-        "entity_label": entity_label,
-    }
-    safe_changes = {}
-    for key, value in (changes or {}).items():
-        if key in _SENSITIVE_FIELDS:
-            safe_changes[key] = {"changed": True}
-        else:
-            safe_changes[key] = value
-    metadata_json["changes"] = (
-        jsonable_encoder(safe_changes) if changes is not None else None
-    )
-
     try:
+        event_type = (
+            "session_opened"
+            if action == "attendance_session.started"
+            else "session_closed"
+        )
+        metadata_json = {
+            "action": action,
+            "entity_type": entity_type,
+            "entity_id": str(entity_id),
+            "entity_label": entity_label,
+        }
+        safe_changes = {}
+        for key, value in (changes or {}).items():
+            if key in _SENSITIVE_FIELDS:
+                safe_changes[key] = {"changed": True}
+            else:
+                safe_changes[key] = value
+        metadata_json["changes"] = (
+            jsonable_encoder(safe_changes) if changes is not None else None
+        )
+
         async with AsyncSessionLocal() as audit_db:
             audit_db.add(
                 AuditLog(

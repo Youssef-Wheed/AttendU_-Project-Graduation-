@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import EmailStr, Field
@@ -80,6 +81,34 @@ class UserResponse(TimestampedResponse):
     full_name: str
     email: EmailStr
     role: str
+
+
+class UserAdminResponse(UserResponse):
+    sections_count: int
+
+
+class TeachingSectionResponse(ORMModel):
+    section_id: UUID
+    section_name: str
+    schedule_time: str
+    course_id: UUID
+    course_code: str
+    course_name: str
+    students_count: int
+    sessions_count: int
+    last_session_at: datetime | None
+
+
+class UserTeachingResponse(ORMModel):
+    id: UUID
+    full_name: str
+    email: EmailStr
+    role: str
+    sections: list[TeachingSectionResponse]
+    sections_count: int
+    unique_students: int
+    total_enrollments: int
+    sessions_count: int
 
 
 class Token(ORMModel):

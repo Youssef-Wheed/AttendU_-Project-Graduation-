@@ -68,6 +68,30 @@
   background: rgba(251, 113, 133, 0.2);
 }
 
+.admin-user-sections-count {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.admin-user-sections-count:hover {
+  background: var(--color-primary-soft);
+}
+
+.admin-user-sections-count:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 /* ─── Form Grid ───────────────────────────────────────────── */
 .admin-form-grid {
   display: grid;

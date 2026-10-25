@@ -1,13 +1,31 @@
 import { httpClient } from '../../../api/httpClient'
-import type { UserApiResponse, UserApiCreatePayload } from '../types/adminApiTypes'
+import type {
+  UserAdminListResponse,
+  UserApiCreatePayload,
+  UserApiResponse,
+  UserTeachingApiResponse,
+} from '../types/adminApiTypes'
 import { extractApiErrorMessage } from './adminApiUtils'
 
-export const listUsersAdmin = async (): Promise<UserApiResponse[]> => {
+export const listUsersAdmin = async (): Promise<UserAdminListResponse[]> => {
   try {
-    const response = await httpClient.get<UserApiResponse[]>('/users')
+    const response = await httpClient.get<UserAdminListResponse[]>('/users')
     return response.data
   } catch (error) {
     throw new Error(extractApiErrorMessage(error, 'Failed to fetch users.'))
+  }
+}
+
+export const getUserTeachingAdmin = async (
+  userId: string,
+): Promise<UserTeachingApiResponse> => {
+  try {
+    const response = await httpClient.get<UserTeachingApiResponse>(
+      `/users/${userId}/teaching`,
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(extractApiErrorMessage(error, 'Failed to fetch teaching details.'))
   }
 }
 

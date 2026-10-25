@@ -17,6 +17,7 @@ interface DataTableProps<TRow> {
   loadingRowCount?: number
   onEditRow?: (row: TRow) => void
   onDeleteRow?: (row: TRow) => void
+  canDeleteRow?: (row: TRow) => boolean
   onRowClick?: (row: TRow) => void
   emptyState?: ReactNode
 }
@@ -29,6 +30,7 @@ export default function DataTable<TRow>({
   loadingRowCount = 4,
   onEditRow,
   onDeleteRow,
+  canDeleteRow,
   onRowClick,
   emptyState,
 }: DataTableProps<TRow>) {
@@ -113,8 +115,9 @@ export default function DataTable<TRow>({
                         className="ui-button ui-button--sm ui-button--icon-only" 
                         style={{ background: 'var(--color-danger-soft)', color: 'var(--color-danger)', border: 'none' }}
                         onClick={() => onDeleteRow(row)}
+                        disabled={canDeleteRow ? !canDeleteRow(row) : false}
                         aria-label={`Delete ${getRowId(row)}`}
-                        title="Delete"
+                        title={canDeleteRow && !canDeleteRow(row) ? 'You cannot delete your own account.' : 'Delete'}
                       >
                         <IconTrash />
                       </button>
